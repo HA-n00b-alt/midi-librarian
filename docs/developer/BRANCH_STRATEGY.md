@@ -113,6 +113,17 @@ Examples:
 - **MVP1**: In `development` branch
 - **MVP2**: Not yet started (will branch from `main` after MVP1)
 
+## Cleaning Main Branch for First Release
+
+Before the first MVP1 release, it's common practice to clean the main branch. See [CLEAN_MAIN_BRANCH.md](CLEAN_MAIN_BRANCH.md) for detailed instructions.
+
+**Quick Summary**:
+1. Complete all development in `development` branch
+2. When ready, create clean main with single "MVP1 Release" commit
+3. Tag the release (v1.0.0)
+4. Protect main branch (no direct pushes)
+5. Continue development in `development`, merge stable releases to `main`
+
 ## Migration Plan
 
 ### From Current State to Organized Structure
