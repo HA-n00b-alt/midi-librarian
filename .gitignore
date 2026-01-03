@@ -4,11 +4,19 @@ Builds/
 *.xcworkspace/
 DerivedData/
 
-# JUCE
-.jucer
+# JUCE project file (optional - some teams commit it, some don't)
+# Uncomment if you want to ignore .jucer files
+# *.jucer
+
+# Projucer generated files (directory name with space)
+MIDI Librarian/JuceLibraryCode/
+MIDI Librarian/Builds/
+# Uncomment to ignore entire MIDI Librarian directory (keeps .jucer file untracked)
+# "MIDI Librarian/"
 
 # macOS
 .DS_Store
+**/.DS_Store
 .AppleDouble
 .LSOverride
 
