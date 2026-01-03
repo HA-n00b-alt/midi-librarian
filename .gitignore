@@ -1,0 +1,29 @@
+# Build artifacts
+Builds/
+*.xcodeproj/
+*.xcworkspace/
+DerivedData/
+
+# JUCE
+.jucer
+
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# IDE
+.idea/
+.vscode/
+*.swp
+*.swo
+*~
+
+# Temporary files
+*.tmp
+*.bak
+*.log
+
+# User data (optional - comment out if you want to track)
+# ~/Library/Application Support/MidiLibrarian/
+

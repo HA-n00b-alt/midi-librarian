@@ -12,29 +12,52 @@ This plugin follows a **Model-View-Controller (MVC)** pattern with clear separat
 ```
 midi-librarian/
 ├── Source/
-│   ├── PluginProcessor.h/cpp          # Main AUv3 processor
-│   ├── PluginEditor.h/cpp              # Main editor window
-│   │
 │   ├── Model/                          # Data models
 │   │   ├── PatchData.h/cpp            # Individual patch structure
 │   │   ├── PatchBank.h/cpp            # Collection of patches (128 slots)
-│   │   └── DeviceModel.h/cpp          # Device configuration (future: templates)
+│   │   ├── DeviceModel.h/cpp          # Device configuration
+│   │   └── DeviceTemplate.h/cpp       # Device template/profiles
 │   │
 │   ├── View/                           # UI Components
 │   │   ├── ValhallaLookAndFeel.h/cpp  # Custom styling
-│   │   ├── DeviceSelectorPanel.h/cpp  # MIDI port/channel selection
+│   │   ├── DeviceSelectorPanel.h/cpp  # MIDI port/channel/bank/template selection
+│   │   ├── DeviceStatusIndicator.h/cpp # Connection status
 │   │   ├── PatchListPanel.h/cpp       # Main patch list view
-│   │   └── PatchListItem.h/cpp        # Individual patch row component
+│   │   ├── PatchListItem.h/cpp        # Individual patch row
+│   │   ├── SearchBar.h/cpp            # Search and filter UI
+│   │   ├── ToolbarPanel.h/cpp         # Undo/redo, actions
+│   │   ├── MidiMonitorPanel.h/cpp     # MIDI message logging
+│   │   └── PatchOperationDialogs.h/cpp # Copy/range dialogs
 │   │
 │   ├── Controller/                     # Business logic
-│   │   ├── MidiManager.h/cpp          # MIDI I/O handling (message thread)
-│   │   ├── PatchManager.h/cpp         # Patch CRUD operations
-│   │   └── PersistenceManager.h/cpp   # JSON save/load
+│   │   ├── PatchManager.h/cpp         # Main coordinator
+│   │   ├── MidiManager.h/cpp          # MIDI I/O (FIFO-based)
+│   │   ├── PersistenceManager.h/cpp   # JSON file I/O
+│   │   ├── DeviceTemplateManager.h/cpp # Template management
+│   │   ├── MidiLearnManager.h/cpp     # MIDI learn/mapping
+│   │   └── UndoableActions.h          # Undo/redo actions
 │   │
-│   └── Utils/                          # Utilities
-│       └── JsonHelpers.h/cpp          # JSON serialization helpers
+│   ├── PluginProcessor.h/cpp          # Main AUv3 processor
+│   └── PluginEditor.h/cpp             # Main editor window
 │
-└── Resources/                           # Assets (if needed)
+├── docs/
+│   ├── user/                          # User documentation
+│   │   ├── USER_GUIDE.md
+│   │   └── QUICK_START.md
+│   ├── developer/                     # Developer documentation
+│   │   ├── DEVELOPER_GUIDE.md
+│   │   ├── CODE_STYLE.md
+│   │   ├── CONTRIBUTING.md
+│   │   ├── ARCHITECTURE.md (this file)
+│   │   ├── THREADING_MODEL.md
+│   │   ├── BRANCH_STRATEGY.md
+│   │   └── ADRs/                      # Architecture Decision Records
+│   └── development/                   # Development notes
+│       ├── IMPLEMENTATION_NOTES.md
+│       ├── IMPROVEMENT_ROADMAP.md
+│       └── PHASE*.md
+│
+└── README.md
 ```
 
 ## Key Design Decisions

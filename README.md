@@ -1,127 +1,99 @@
-# MIDI Librarian - AUv3 Plugin
+# MIDI Librarian
 
 A minimalist MIDI librarian plugin for Logic Pro (macOS) built with JUCE and C++.
 
+## Overview
+
+MIDI Librarian is an AUv3 plugin designed for managing patches on hardware synthesizers and digital FX units. It provides a clean, modern interface for organizing, renaming, and recalling patches via MIDI Program Change messages.
+
 ## Features
 
-- **MIDI Device Selection**: Choose MIDI output port and channel (1-16)
-- **Patch Management**: 128-slot patch bank with rename and recall
-- **Local Persistence**: Automatic save/load of patch data as JSON
-- **Clean UI**: Valhalla DSP-inspired minimalist design
-- **Resizable Interface**: Touch-friendly, modern UI
+### Core Features
+- **MIDI Device Selection** - Choose MIDI output port and channel (1-16)
+- **Patch Management** - 128-slot patch bank with rename and recall
+- **Local Persistence** - Automatic save/load of patch data as JSON
+- **Clean UI** - Valhalla DSP-inspired minimalist design
+- **Resizable Interface** - Touch-friendly, modern UI
 
-## Architecture
+### Advanced Features
+- **Search & Filtering** - Real-time search and favorites filter
+- **Undo/Redo** - Full undo/redo system for all operations
+- **Device Templates** - Pre-built profiles for popular synths
+- **MIDI Learn** - Map hardware controllers to patch recall
+- **Batch Operations** - Copy, clear range, batch rename
+- **MIDI Monitoring** - Real-time MIDI input/output logging
+- **Bank Select** - Support for multi-bank synths (MSB/LSB)
 
-This plugin follows a **Model-View-Controller (MVC)** pattern:
+## Quick Start
 
-### Model Layer (`Source/Model/`)
-- `PatchData`: Individual patch structure (slot, name, device ID)
-- `PatchBank`: Collection of 128 patches with change broadcasting
-- `DeviceModel`: MIDI device configuration
+1. **Build the Plugin**
+   ```bash
+   # Open in Projucer, configure as AUv3, generate Xcode project
+   # Build and install in Logic Pro
+   ```
 
-### View Layer (`Source/View/`)
-- `ValhallaLookAndFeel`: Custom styling for all components
-- `DeviceSelectorPanel`: MIDI port/channel selection
-- `PatchListPanel`: Scrollable list of patches
-- `PatchListItem`: Individual patch row component
+2. **First Use**
+   - Select your MIDI output device
+   - Choose MIDI channel (1-16)
+   - Select device template (optional)
+   - Start organizing your patches!
 
-### Controller Layer (`Source/Controller/`)
-- `PatchManager`: Main coordinator (ties Model, View, I/O together)
-- `MidiManager`: MIDI I/O handling (runs on message thread)
-- `PersistenceManager`: JSON file I/O
+3. **Basic Operations**
+   - **Rename**: Click patch name, type new name, press Enter
+   - **Recall**: Click "Recall" button to send Program Change
+   - **Search**: Type in search bar to filter patches
+   - **Favorite**: Click ★ to mark as favorite
 
-## Threading Model
+See [User Guide](docs/user/USER_GUIDE.md) for detailed instructions.
 
-**Critical**: All MIDI operations run on the **message thread**, NOT the audio thread.
+## Documentation
 
-- **Audio Thread**: Not used (MIDI-only plugin, `processBlock` just clears buffer)
-- **Message Thread**: UI updates, MIDI I/O, file I/O
-- **Background Thread**: Optional for future large file operations
+- **[User Guide](docs/user/USER_GUIDE.md)** - Complete user documentation
+- **[Quick Start](docs/user/QUICK_START.md)** - Getting started guide
+- **[Architecture](docs/developer/ARCHITECTURE.md)** - Technical architecture
+- **[Developer Guide](docs/developer/DEVELOPER_GUIDE.md)** - For contributors
 
-## Data Persistence
+## Requirements
 
-### Local Storage
-- **Location**: `~/Library/Application Support/MidiLibrarian/`
-- **Files**:
-  - `patches.json`: Patch bank data
-  - `config.json`: Device configuration
-
-### JSON Structure
-
-**patches.json**:
-```json
-[
-  {
-    "slotIndex": 0,
-    "patchName": "Init",
-    "deviceID": "generic"
-  },
-  ...
-]
-```
-
-**config.json**:
-```json
-{
-  "midiOutputPortName": "My Synth",
-  "midiChannel": 1,
-  "deviceID": "generic"
-}
-```
-
-### Export/Import
-Use `PersistenceManager::exportToFile()` and `importFromFile()` for backup/restore.
+- macOS 10.13+ (for AUv3 support)
+- JUCE 7.0+ (latest recommended)
+- Xcode 12+ (for building)
+- Logic Pro (for testing/use)
 
 ## Building
 
-1. Open the `.jucer` file in Projucer (or create one)
-2. Add all source files from `Source/` directory
-3. Configure as AUv3 plugin
-4. Generate Xcode project
-5. Build in Xcode
+1. Open Projucer
+2. Create new AUv3 plugin project (or open existing `.jucer` file)
+3. Add all source files from `Source/` directory
+4. Configure as MIDI Effect plugin
+5. Generate Xcode project
+6. Build and install
 
-## Extension Points
+See [Developer Guide](docs/developer/DEVELOPER_GUIDE.md) for detailed build instructions.
 
-### Device Templates
-- Extend `DeviceModel` with device-specific properties
-- Add validation to `PatchBank` for device-specific constraints
-- Store templates in separate JSON files
+## Project Structure
 
-### SysEx Backup
-- Add methods to `MidiManager` for bulk SysEx operations
-- Create background thread for large transfers
-- Add progress UI component
-
-### Patch Editor
-- Create new View component for parameter editing
-- Extend `PatchData` with parameter maps
-- Add device-specific parameter definitions
-
-## UI Styling
-
-The `ValhallaLookAndFeel` class provides:
-- Light background (98% white)
-- Single accent color (configurable hue)
-- Large, touch-friendly controls
-- Minimal borders and shadows
-- Crisp typography
-
-To customize colors, modify constants in `ValhallaLookAndFeel.h`:
-```cpp
-static constexpr float ACCENT_HUE = 0.6f; // Blue-green
-static constexpr float ACCENT_SATURATION = 0.7f;
-static constexpr float ACCENT_BRIGHTNESS = 0.5f;
 ```
-
-## Code Style
-
-- Modern C++17 features where helpful
-- Clear separation of concerns (MVC)
-- Inline comments for non-trivial logic
-- JUCE coding conventions
-- No single-file mega-blobs
+midi-librarian/
+├── Source/              # Source code
+│   ├── Model/          # Data models
+│   ├── View/           # UI components
+│   ├── Controller/     # Business logic
+│   ├── PluginProcessor.h/cpp
+│   └── PluginEditor.h/cpp
+│
+├── docs/               # Documentation
+│   ├── user/          # User documentation
+│   ├── developer/     # Developer documentation
+│   └── development/   # Development notes
+│
+└── README.md          # This file
+```
 
 ## License
 
 [Your License Here]
 
+## Support
+
+For issues, questions, or contributions, please see the [Developer Guide](docs/developer/DEVELOPER_GUIDE.md).
