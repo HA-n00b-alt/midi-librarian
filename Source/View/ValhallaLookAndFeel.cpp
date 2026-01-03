@@ -14,14 +14,16 @@ void ValhallaLookAndFeel::setupColours()
     accentColour = juce::Colour::fromHSV(
         ACCENT_HUE, ACCENT_SATURATION, ACCENT_BRIGHTNESS, 1.0f);
     
-    textColour = juce::Colour::fromFloatRGBA(0.1f, 0.1f, 0.1f, 1.0f);
-    borderColour = juce::Colour::fromFloatRGBA(0.85f, 0.85f, 0.85f, 1.0f);
+    // Improved text color for better readability (darker for better contrast)
+    textColour = juce::Colour::fromFloatRGBA(0.05f, 0.05f, 0.05f, 1.0f);
+    borderColour = juce::Colour::fromFloatRGBA(0.8f, 0.8f, 0.8f, 1.0f);
 }
 
 void ValhallaLookAndFeel::setupFonts()
 {
     // Use system font for crisp rendering (using new FontOptions API)
-    defaultFont = juce::Font(juce::FontOptions().withHeight(14.0f));
+    // Increased font size for better readability
+    defaultFont = juce::Font(juce::FontOptions().withHeight(16.0f));
 }
 
 juce::Colour ValhallaLookAndFeel::getBackgroundColour() const
@@ -72,8 +74,9 @@ void ValhallaLookAndFeel::drawButtonText(juce::Graphics& g, juce::TextButton& bu
                                          bool shouldDrawButtonAsHighlighted,
                                          bool shouldDrawButtonAsDown)
 {
+    // Use darker text for better contrast on buttons
     g.setColour(textColour);
-    g.setFont(defaultFont);
+    g.setFont(getTextButtonFont(button, button.getHeight()));
     
     auto textArea = button.getLocalBounds();
     g.drawFittedText(button.getButtonText(), textArea,
@@ -156,7 +159,8 @@ void ValhallaLookAndFeel::drawScrollbar(juce::Graphics& g, juce::ScrollBar& scro
 
 juce::Font ValhallaLookAndFeel::getTextButtonFont(juce::TextButton&, int buttonHeight)
 {
-    return defaultFont.withHeight(juce::jmax(14.0f, buttonHeight * 0.5f));
+    // Larger font for button text for better readability
+    return defaultFont.withHeight(juce::jmax(16.0f, buttonHeight * 0.5f));
 }
 
 juce::Font ValhallaLookAndFeel::getComboBoxFont(juce::ComboBox&)

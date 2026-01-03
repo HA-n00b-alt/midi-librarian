@@ -5,7 +5,8 @@
               companyEmail="delman@delman.it" pluginCharacteristicsValue="pluginProducesMidiOut,pluginWantsMidiIn"
               pluginFormats="buildAUv3,buildStandalone,buildVST3" pluginManufacturerCode="DELM"
               pluginCode="MLBR" pluginManufacturer="Delman" companyName="delman"
-              pluginDesc="Generic MIDI librarian" pluginAUMainType="'auol'">
+              pluginDesc="Generic MIDI librarian" pluginAUMainType="'auol'"
+              defines="JUCE_IGNORE_VST3_MISMATCHED_PARAMETER_ID_WARNING=1">
   <MAINGROUP id="aYKyAm" name="MIDI Librarian">
     <GROUP id="{34B565FC-8C27-87BC-F9CA-716FFC92E21C}" name="Source">
       <GROUP id="{C84BC541-7C85-5632-41DB-C6DDDF7493C0}" name="Controller">
