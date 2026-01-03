@@ -45,8 +45,8 @@ midi-librarian/
 ### 2. Custom LookAndFeel
 **Why**: JUCE's LookAndFeel is the standard way to customize appearance across all components. By overriding drawing methods in one place, we ensure consistent styling and easy theme changes.
 
-### 3. MIDI on Message Thread
-**Why**: MIDI messages are not time-critical like audio. Using the message thread prevents blocking the audio thread and allows proper synchronization with UI updates.
+### 3. MIDI Threading Model
+**Why**: MIDI messages are queued from the message thread (UI) but processed on the audio thread via `AbstractFifo` for sample-accurate timing. This ensures proper DAW integration while maintaining a simple UI API. Device management (port open/close) remains on the message thread as it's not time-critical.
 
 ### 4. PatchBank as Model
 **Why**: Encapsulates the 128-slot structure, provides validation, and makes it easy to extend (e.g., different bank sizes per device template).
@@ -66,9 +66,14 @@ midi-librarian/
 
 ## Threading Model
 
-- **Audio Thread**: Not used (MIDI-only plugin)
-- **Message Thread**: All UI updates, MIDI I/O, file I/O
+- **Audio Thread**: Processes queued MIDI messages from FIFO for sample-accurate timing
+- **Message Thread**: UI updates, MIDI message queuing, file I/O, device management
 - **Background Thread**: Optional for large file operations (future)
+
+**Critical**: MIDI messages are queued from the message thread (UI) and processed on the audio thread via `AbstractFifo`. This ensures:
+- Sample-accurate timing for DAW automation
+- No blocking of audio thread
+- Thread-safe communication between UI and audio processing
 
 ## Extension Points
 

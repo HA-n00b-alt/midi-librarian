@@ -5,14 +5,17 @@
 #include "../Model/DeviceModel.h"
 #include "MidiManager.h"
 #include "PersistenceManager.h"
+#include "UndoableActions.h"
 
 /**
  * Coordinates patch operations, MIDI I/O, and persistence.
  * 
  * This is the main Controller that ties together Model, View, and I/O.
  * It provides a high-level API for patch management operations.
+ * Includes undo/redo support for all patch operations.
  */
-class PatchManager : public juce::ChangeBroadcaster
+class PatchManager : public juce::ChangeBroadcaster,
+                     public juce::ChangeListener
 {
 public:
     PatchManager();
@@ -25,10 +28,24 @@ public:
     const DeviceModel& getDeviceModel() const noexcept { return deviceModel; }
     MidiManager& getMidiManager() noexcept { return midiManager; }
     PersistenceManager& getPersistenceManager() noexcept { return persistenceManager; }
+    juce::UndoManager& getUndoManager() noexcept { return undoManager; }
     
-    // Patch operations
+    // Patch operations (with undo support)
     void renamePatch(int slotIndex, const juce::String& newName);
     void recallPatch(int slotIndex); // Sends MIDI PC and updates UI
+    void setPatchFavorite(int slotIndex, bool favorite);
+    void copyPatch(int sourceSlot, int destSlot);
+    void batchRenamePatches(const juce::Array<int>& slotIndices, 
+                           const juce::String& baseName);
+    void clearPatchRange(int startSlot, int endSlot);
+    
+    // Undo/Redo
+    void undo();
+    void redo();
+    bool canUndo() const noexcept;
+    bool canRedo() const noexcept;
+    juce::String getUndoDescription() const;
+    juce::String getRedoDescription() const;
     
     // Device operations
     void setMidiOutputPort(const juce::String& portName);
@@ -42,11 +59,15 @@ public:
     void exportPatches(const juce::File& file);
     void importPatches(const juce::File& file);
     
+    // ChangeListener (for undo manager)
+    void changeListenerCallback(juce::ChangeBroadcaster* source) override;
+    
 private:
     PatchBank patchBank;
     DeviceModel deviceModel;
     MidiManager midiManager;
     PersistenceManager persistenceManager;
+    juce::UndoManager undoManager;
     
     void syncMidiManagerWithDeviceModel();
     

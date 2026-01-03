@@ -28,6 +28,12 @@ PatchListItem::PatchListItem(int slot, const juce::String& name)
     recallButton.addListener(this);
     addAndMakeVisible(recallButton);
     
+    // Favorite button
+    favoriteButton.setButtonText("★");
+    favoriteButton.setClickingTogglesState(true);
+    favoriteButton.addListener(this);
+    addAndMakeVisible(favoriteButton);
+    
     // Make entire row clickable for editing
     nameLabel.addMouseListener(this, false);
 }
@@ -55,12 +61,16 @@ void PatchListItem::resized()
     auto bounds = getLocalBounds().reduced(4);
     const int slotWidth = 60;
     const int buttonWidth = 80;
+    const int favoriteButtonWidth = 32;
     const int spacing = 8;
     
     slotLabel.setBounds(bounds.removeFromLeft(slotWidth));
     bounds.removeFromLeft(spacing);
     
     recallButton.setBounds(bounds.removeFromRight(buttonWidth));
+    bounds.removeFromRight(spacing);
+    
+    favoriteButton.setBounds(bounds.removeFromRight(favoriteButtonWidth));
     bounds.removeFromRight(spacing);
     
     if (isEditing)
@@ -99,6 +109,11 @@ void PatchListItem::buttonClicked(juce::Button* button)
     {
         onRecall(slotIndex);
     }
+    else if (button == &favoriteButton && onFavoriteChanged)
+    {
+        isFavoriteFlag = favoriteButton.getToggleState();
+        onFavoriteChanged(slotIndex, isFavoriteFlag);
+    }
 }
 
 void PatchListItem::setPatchName(const juce::String& name)
@@ -113,6 +128,16 @@ void PatchListItem::setSelected(bool selected)
     if (isSelected != selected)
     {
         isSelected = selected;
+        repaint();
+    }
+}
+
+void PatchListItem::setFavorite(bool favorite)
+{
+    if (isFavoriteFlag != favorite)
+    {
+        isFavoriteFlag = favorite;
+        favoriteButton.setToggleState(favorite, juce::dontSendNotification);
         repaint();
     }
 }

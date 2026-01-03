@@ -12,6 +12,9 @@ DeviceSelectorPanel::DeviceSelectorPanel(PatchManager& pm)
     portComboBox.addListener(this);
     addAndMakeVisible(portComboBox);
     
+    // Status indicator
+    addAndMakeVisible(statusIndicator);
+    
     // Channel selection
     channelLabel.setText("Channel:", juce::dontSendNotification);
     channelLabel.setJustificationType(juce::Justification::centredLeft);
@@ -21,11 +24,27 @@ DeviceSelectorPanel::DeviceSelectorPanel(PatchManager& pm)
     updateChannelComboBox();
     addAndMakeVisible(channelComboBox);
     
+    // Bank selection
+    bankLabel.setText("Bank:", juce::dontSendNotification);
+    bankLabel.setJustificationType(juce::Justification::centredLeft);
+    addAndMakeVisible(bankLabel);
+    
+    bankComboBox.addListener(this);
+    updateBankComboBox();
+    addAndMakeVisible(bankComboBox);
+    
+    useMSBButton.setButtonText("MSB");
+    useMSBButton.setClickingTogglesState(true);
+    useMSBButton.setToggleState(true, juce::dontSendNotification);
+    useMSBButton.addListener(this);
+    addAndMakeVisible(useMSBButton);
+    
     // Listen for MIDI device changes
     patchManager.getMidiManager().addChangeListener(this);
     
     // Initial refresh
     refreshPortList();
+    updateConnectionStatus();
     
     // Set initial values from model
     auto currentPort = patchManager.getDeviceModel().getMidiOutputPortName();
@@ -54,11 +73,16 @@ void DeviceSelectorPanel::resized()
     const int labelWidth = 100;
     const int controlHeight = 32;
     const int spacing = 8;
+    const int statusWidth = 120;
     
     // Port selection row
     auto portRow = bounds.removeFromTop(controlHeight);
     portLabel.setBounds(portRow.removeFromLeft(labelWidth));
     portRow.removeFromLeft(spacing);
+    
+    statusIndicator.setBounds(portRow.removeFromRight(statusWidth));
+    portRow.removeFromRight(spacing);
+    
     portComboBox.setBounds(portRow);
     
     bounds.removeFromTop(spacing);
@@ -68,6 +92,18 @@ void DeviceSelectorPanel::resized()
     channelLabel.setBounds(channelRow.removeFromLeft(labelWidth));
     channelRow.removeFromLeft(spacing);
     channelComboBox.setBounds(channelRow.removeFromLeft(80));
+    
+    bounds.removeFromTop(spacing);
+    
+    // Bank selection row
+    auto bankRow = bounds.removeFromTop(controlHeight);
+    bankLabel.setBounds(bankRow.removeFromLeft(labelWidth));
+    bankRow.removeFromLeft(spacing);
+    
+    useMSBButton.setBounds(bankRow.removeFromRight(50));
+    bankRow.removeFromRight(spacing);
+    
+    bankComboBox.setBounds(bankRow.removeFromLeft(80));
 }
 
 void DeviceSelectorPanel::comboBoxChanged(juce::ComboBox* comboBoxThatHasChanged)
@@ -76,6 +112,7 @@ void DeviceSelectorPanel::comboBoxChanged(juce::ComboBox* comboBoxThatHasChanged
     {
         juce::String selectedPort = portComboBox.getText();
         patchManager.setMidiOutputPort(selectedPort);
+        updateConnectionStatus();
     }
     else if (comboBoxThatHasChanged == &channelComboBox)
     {
@@ -85,11 +122,35 @@ void DeviceSelectorPanel::comboBoxChanged(juce::ComboBox* comboBoxThatHasChanged
             patchManager.setMidiChannel(selectedChannel);
         }
     }
+    else if (comboBoxThatHasChanged == &bankComboBox)
+    {
+        int selectedBank = bankComboBox.getSelectedId() - 1; // IDs are 1-based
+        if (selectedBank >= 0 && selectedBank <= 127)
+        {
+            bool useMSB = useMSBButton.getToggleState();
+            patchManager.getMidiManager().sendBankSelect(selectedBank, useMSB);
+        }
+    }
+}
+
+void DeviceSelectorPanel::buttonClicked(juce::Button* button)
+{
+    if (button == &useMSBButton)
+    {
+        // If bank is selected, resend bank select with new MSB/LSB setting
+        int selectedBank = bankComboBox.getSelectedId() - 1;
+        if (selectedBank >= 0 && selectedBank <= 127)
+        {
+            bool useMSB = useMSBButton.getToggleState();
+            patchManager.getMidiManager().sendBankSelect(selectedBank, useMSB);
+        }
+    }
 }
 
 void DeviceSelectorPanel::changeListenerCallback(juce::ChangeBroadcaster* source)
 {
     refreshPortList();
+    updateConnectionStatus();
 }
 
 void DeviceSelectorPanel::refreshPortList()
@@ -122,5 +183,38 @@ void DeviceSelectorPanel::updateChannelComboBox()
     {
         channelComboBox.addItem(juce::String(i), i);
     }
+}
+
+void DeviceSelectorPanel::updateBankComboBox()
+{
+    bankComboBox.clear();
+    bankComboBox.addItem("Bank 0", 1);
+    for (int i = 1; i <= 127; ++i)
+    {
+        bankComboBox.addItem("Bank " + juce::String(i), i + 1);
+    }
+    bankComboBox.setSelectedId(1, juce::dontSendNotification); // Default to bank 0
+}
+
+void DeviceSelectorPanel::updateConnectionStatus()
+{
+    bool isConnected = patchManager.getMidiManager().isPortOpen();
+    auto portName = patchManager.getMidiManager().getCurrentPortName();
+    
+    juce::String statusText;
+    if (isConnected && portName.isNotEmpty())
+    {
+        statusText = "Connected: " + portName;
+    }
+    else if (!portName.isEmpty())
+    {
+        statusText = "Disconnected";
+    }
+    else
+    {
+        statusText = "No device selected";
+    }
+    
+    statusIndicator.setConnected(isConnected, statusText);
 }
 

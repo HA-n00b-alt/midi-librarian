@@ -5,6 +5,7 @@ MidiLibrarianAudioProcessorEditor::MidiLibrarianAudioProcessorEditor(MidiLibrari
     : AudioProcessorEditor(&p)
     , audioProcessor(p)
     , deviceSelectorPanel(p.getPatchManager())
+    , toolbarPanel(p.getPatchManager())
     , patchListPanel(p.getPatchManager())
 {
     // Apply custom look and feel
@@ -12,6 +13,7 @@ MidiLibrarianAudioProcessorEditor::MidiLibrarianAudioProcessorEditor(MidiLibrari
     
     // Add child components
     addAndMakeVisible(deviceSelectorPanel);
+    addAndMakeVisible(toolbarPanel);
     addAndMakeVisible(patchListPanel);
     
     // Set initial window size (resizable)
@@ -36,9 +38,15 @@ void MidiLibrarianAudioProcessorEditor::resized()
 {
     auto bounds = getLocalBounds().reduced(8);
     
-    // Device selector at top
-    const int selectorHeight = 80;
+    // Device selector at top (now includes bank selection, so taller)
+    const int selectorHeight = 120;
     deviceSelectorPanel.setBounds(bounds.removeFromTop(selectorHeight));
+    
+    bounds.removeFromTop(8); // Spacing
+    
+    // Toolbar
+    const int toolbarHeight = 40;
+    toolbarPanel.setBounds(bounds.removeFromTop(toolbarHeight));
     
     bounds.removeFromTop(8); // Spacing
     

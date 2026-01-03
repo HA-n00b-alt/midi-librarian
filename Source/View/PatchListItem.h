@@ -32,9 +32,12 @@ public:
     // Callbacks
     std::function<void(int slotIndex, const juce::String& newName)> onRename;
     std::function<void(int slotIndex)> onRecall;
+    std::function<void(int slotIndex, bool favorite)> onFavoriteChanged;
     
     void setPatchName(const juce::String& name);
     void setSelected(bool selected);
+    void setFavorite(bool favorite);
+    bool isFavorite() const noexcept { return isFavoriteFlag; }
     
     void mouseDown(const juce::MouseEvent& e) override;
     
@@ -43,11 +46,13 @@ private:
     juce::String patchName;
     bool isSelected = false;
     bool isEditing = false;
+    bool isFavoriteFlag = false;
     
     juce::Label slotLabel;
     juce::Label nameLabel;
     juce::TextEditor nameEditor;
     juce::TextButton recallButton;
+    juce::TextButton favoriteButton;
     
     void startEditing();
     void stopEditing(bool commit);

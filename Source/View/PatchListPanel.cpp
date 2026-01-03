@@ -4,6 +4,17 @@
 PatchListPanel::PatchListPanel(PatchManager& pm)
     : patchManager(pm)
 {
+    // Search bar
+    searchBar.onSearchTextChanged = [this](const juce::String& query)
+    {
+        onSearchTextChanged(query);
+    };
+    searchBar.onFavoritesFilterChanged = [this](bool favoritesOnly)
+    {
+        onFavoritesFilterChanged(favoritesOnly);
+    };
+    addAndMakeVisible(searchBar);
+    
     addAndMakeVisible(viewport);
     viewport.setViewedComponent(&listContainer, false);
     viewport.setScrollBarsShown(true, false, false, false);
@@ -29,18 +40,36 @@ void PatchListPanel::paint(juce::Graphics& g)
 
 void PatchListPanel::resized()
 {
-    viewport.setBounds(getLocalBounds());
+    auto bounds = getLocalBounds();
     
-    // Update list container height based on number of items
+    // Search bar at top
+    const int searchHeight = 40;
+    searchBar.setBounds(bounds.removeFromTop(searchHeight));
+    bounds.removeFromTop(4); // Spacing
+    
+    // Viewport takes remaining space
+    viewport.setBounds(bounds);
+    
+    // Update list container height based on visible items
     const int itemHeight = 48;
-    listContainer.setSize(viewport.getWidth() - viewport.getScrollBarThickness(),
-                         patchItems.size() * itemHeight);
-    
-    // Update item positions
-    auto bounds = listContainer.getLocalBounds();
+    int visibleCount = 0;
     for (auto* item : patchItems)
     {
-        item->setBounds(bounds.removeFromTop(itemHeight));
+        if (item->isVisible())
+            visibleCount++;
+    }
+    
+    listContainer.setSize(viewport.getWidth() - viewport.getScrollBarThickness(),
+                         visibleCount * itemHeight);
+    
+    // Update item positions (only for visible items)
+    auto containerBounds = listContainer.getLocalBounds();
+    for (auto* item : patchItems)
+    {
+        if (item->isVisible())
+        {
+            item->setBounds(containerBounds.removeFromTop(itemHeight));
+        }
     }
 }
 
@@ -48,7 +77,33 @@ void PatchListPanel::changeListenerCallback(juce::ChangeBroadcaster* source)
 {
     if (source == &patchManager.getPatchBank())
     {
-        rebuildList();
+        // Update existing items instead of full rebuild if possible
+        const auto& bank = patchManager.getPatchBank();
+        bool needsRebuild = false;
+        
+        for (int i = 0; i < patchItems.size() && i < PatchBank::BANK_SIZE; ++i)
+        {
+            const auto& patch = bank.getPatch(i);
+            if (patchItems[i] != nullptr)
+            {
+                patchItems[i]->setPatchName(patch.getPatchName());
+                patchItems[i]->setFavorite(patch.isFavorite());
+            }
+            else
+            {
+                needsRebuild = true;
+                break;
+            }
+        }
+        
+        if (needsRebuild || patchItems.size() != PatchBank::BANK_SIZE)
+        {
+            rebuildList();
+        }
+        else
+        {
+            applyFilters(); // Re-apply filters in case favorites changed
+        }
     }
 }
 
@@ -56,13 +111,14 @@ void PatchListPanel::rebuildList()
 {
     patchItems.clear();
     
-    const int itemHeight = 48;
     const auto& bank = patchManager.getPatchBank();
     
     for (int i = 0; i < PatchBank::BANK_SIZE; ++i)
     {
         const auto& patch = bank.getPatch(i);
         auto* item = new PatchListItem(i, patch.getPatchName());
+        
+        item->setFavorite(patch.isFavorite());
         
         item->onRename = [this](int slot, const juce::String& name)
         {
@@ -74,13 +130,59 @@ void PatchListPanel::rebuildList()
             onPatchRecall(slot);
         };
         
+        item->onFavoriteChanged = [this](int slot, bool favorite)
+        {
+            patchManager.setPatchFavorite(slot, favorite);
+        };
+        
         patchItems.add(item);
-        listContainer.addAndMakeVisible(item);
+        listContainer.addChildComponent(item); // Use addChildComponent so we can hide/show
     }
     
-    // Update container size
-    listContainer.setSize(listContainer.getWidth(), patchItems.size() * itemHeight);
+    applyFilters();
     resized();
+}
+
+void PatchListPanel::applyFilters()
+{
+    for (int i = 0; i < patchItems.size(); ++i)
+    {
+        bool shouldShow = shouldShowPatch(i);
+        patchItems[i]->setVisible(shouldShow);
+    }
+    
+    resized(); // Update layout
+}
+
+bool PatchListPanel::shouldShowPatch(int slotIndex) const
+{
+    const auto& bank = patchManager.getPatchBank();
+    const auto& patch = bank.getPatch(slotIndex);
+    
+    // Favorites filter
+    if (showFavoritesOnly && !patch.isFavorite())
+        return false;
+    
+    // Search query filter
+    if (currentSearchQuery.isNotEmpty())
+    {
+        if (!patch.matchesSearchQuery(currentSearchQuery))
+            return false;
+    }
+    
+    return true;
+}
+
+void PatchListPanel::onSearchTextChanged(const juce::String& query)
+{
+    currentSearchQuery = query;
+    applyFilters();
+}
+
+void PatchListPanel::onFavoritesFilterChanged(bool favoritesOnly)
+{
+    showFavoritesOnly = favoritesOnly;
+    applyFilters();
 }
 
 void PatchListPanel::onPatchRename(int slotIndex, const juce::String& newName)

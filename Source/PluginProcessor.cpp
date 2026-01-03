@@ -113,8 +113,8 @@ void MidiLibrarianAudioProcessor::processBlock(juce::AudioBuffer<float>& buffer,
     // Clear audio buffer (MIDI-only plugin)
     buffer.clear();
     
-    // MIDI processing is handled by MidiManager on the message thread
-    // We don't process MIDI here to avoid blocking the audio thread
+    // Process queued MIDI messages from MidiManager (sample-accurate timing)
+    patchManager.getMidiManager().processAudioThread(midiMessages);
 }
 
 void MidiLibrarianAudioProcessor::getStateInformation(juce::MemoryBlock& destData)
@@ -144,8 +144,12 @@ void MidiLibrarianAudioProcessor::setStateInformation(const void* data, int size
         if (obj->hasProperty("deviceConfig"))
         {
             patchManager.getDeviceModel().fromVar(obj->getProperty("deviceConfig"));
-            // Sync MIDI manager
-            patchManager.setMidiOutputPort(patchManager.getDeviceModel().getMidiOutputPortName());
+            // Sync MIDI manager (will handle errors gracefully)
+            auto portName = patchManager.getDeviceModel().getMidiOutputPortName();
+            if (!portName.isEmpty())
+            {
+                patchManager.setMidiOutputPort(portName);
+            }
             patchManager.setMidiChannel(patchManager.getDeviceModel().getMidiChannelDisplay());
         }
     }
