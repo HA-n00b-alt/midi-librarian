@@ -3,9 +3,9 @@
 <JUCERPROJECT id="XYkt1B" name="MIDI Librarian" projectType="audioplug" useAppConfig="0"
               addUsingNamespaceToJuceHeader="0" jucerFormatVersion="1" companyWebsite="www.delman.it"
               companyEmail="delman@delman.it" pluginCharacteristicsValue="pluginProducesMidiOut,pluginWantsMidiIn"
-              pluginFormats="buildAUv3,buildVST3" pluginManufacturerCode="DELM"
+              pluginFormats="buildAUv3,buildStandalone,buildVST3" pluginManufacturerCode="DELM"
               pluginCode="MLBR" pluginManufacturer="Delman" companyName="delman"
-              pluginDesc="Generic MIDI librarian" pluginAUMainType="'aumi'">
+              pluginDesc="Generic MIDI librarian" pluginAUMainType="'auol'">
   <MAINGROUP id="aYKyAm" name="MIDI Librarian">
     <GROUP id="{34B565FC-8C27-87BC-F9CA-716FFC92E21C}" name="Source">
       <GROUP id="{C84BC541-7C85-5632-41DB-C6DDDF7493C0}" name="Controller">
@@ -87,11 +87,13 @@
   <MODULES>
     <MODULE id="juce_audio_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
     <MODULE id="juce_audio_devices" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_audio_formats" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
     <MODULE id="juce_audio_plugin_client" showAllCode="1" useLocalCopy="0"
             useGlobalPath="0"/>
     <MODULE id="juce_audio_processors" showAllCode="0" useLocalCopy="0" useGlobalPath="0"/>
     <MODULE id="juce_audio_processors_headless" showAllCode="0" useLocalCopy="0"
             useGlobalPath="0"/>
+    <MODULE id="juce_audio_utils" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
     <MODULE id="juce_core" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
     <MODULE id="juce_data_structures" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
     <MODULE id="juce_events" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
@@ -118,6 +120,8 @@
         <MODULEPATH id="juce_gui_extra" path="../../JUCE/modules"/>
         <MODULEPATH id="juce_audio_processors" path="../../JUCE/modules"/>
         <MODULEPATH id="juce_audio_processors_headless" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_audio_utils" path="../../JUCE/modules"/>
+        <MODULEPATH id="juce_audio_formats" path="../../JUCE/modules"/>
       </MODULEPATHS>
     </XCODE_MAC>
   </EXPORTFORMATS>
