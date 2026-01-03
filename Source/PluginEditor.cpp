@@ -38,8 +38,8 @@ void MidiLibrarianAudioProcessorEditor::resized()
 {
     auto bounds = getLocalBounds().reduced(8);
     
-    // Device selector at top (now includes bank selection, so taller)
-    const int selectorHeight = 120;
+    // Device selector at top (now includes bank selection and template, so taller)
+    const int selectorHeight = 160;
     deviceSelectorPanel.setBounds(bounds.removeFromTop(selectorHeight));
     
     bounds.removeFromTop(8); // Spacing

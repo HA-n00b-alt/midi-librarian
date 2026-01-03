@@ -6,15 +6,34 @@ MidiManager::MidiManager()
     midiMessageQueue.ensureStorageAllocated(MIDI_FIFO_SIZE);
     midiMessageQueue.resize(MIDI_FIFO_SIZE);
     
+    // Create input callback
+    inputCallback = std::make_unique<MidiInputCallback>(*this);
+    
     // Listen for MIDI device changes
     juce::MidiOutput::getDevices(); // Trigger device list refresh
     juce::MidiOutput::addChangeListener(this);
+    juce::MidiInput::getDevices(); // Trigger input device list refresh
+    juce::MidiInput::addChangeListener(this);
 }
 
 MidiManager::~MidiManager()
 {
     juce::MidiOutput::removeChangeListener(this);
+    juce::MidiInput::removeChangeListener(this);
     closePort();
+    closeInputPort();
+}
+
+void MidiManager::MidiInputCallback::handleIncomingMidiMessage(juce::MidiInput* source, const juce::MidiMessage& message)
+{
+    // Forward to callback on message thread
+    if (midiManager.onMidiInput)
+    {
+        juce::MessageManager::callAsync([this, message]()
+        {
+            midiManager.onMidiInput(message);
+        });
+    }
 }
 
 juce::Result MidiManager::setOutputPort(const juce::String& portName)
@@ -52,6 +71,35 @@ void MidiManager::setMidiChannel(int channel)
 juce::StringArray MidiManager::getAvailableOutputPorts() const
 {
     return juce::MidiOutput::getDevices();
+}
+
+juce::StringArray MidiManager::getAvailableInputPorts() const
+{
+    return juce::MidiInput::getDevices();
+}
+
+juce::Result MidiManager::setInputPort(const juce::String& portName)
+{
+    const juce::ScopedLock sl(deviceLock);
+    
+    if (portName.isEmpty())
+    {
+        closeInputPort();
+        sendChangeMessage();
+        return juce::Result::ok();
+    }
+    
+    if (portName == currentInputPortName && midiInput != nullptr)
+    {
+        return juce::Result::ok(); // Already open
+    }
+    
+    auto result = openInputPort(portName);
+    if (result.wasOk())
+    {
+        sendChangeMessage();
+    }
+    return result;
 }
 
 juce::Result MidiManager::sendProgramChange(int programNumber)
@@ -169,6 +217,49 @@ juce::Result MidiManager::sendBankSelect(int bankNumber, bool useMSB)
     return sendControlChange(controller, bankNumber);
 }
 
+juce::Result MidiManager::sendSysEx(const juce::uint8* data, int dataSize)
+{
+    if (data == nullptr || dataSize <= 0)
+    {
+        return juce::Result::fail("Invalid SysEx data");
+    }
+    
+    {
+        const juce::ScopedLock sl(deviceLock);
+        if (midiOutput == nullptr)
+        {
+            return juce::Result::fail("MIDI output port not open");
+        }
+    }
+    
+    const juce::ScopedLock sl(midiQueueLock);
+    
+    // SysEx messages can be large, so we need to handle them carefully
+    // For now, we'll queue them like other messages, but they might need special handling
+    int start1, size1, start2, size2;
+    midiFifo.prepareToWrite(1, start1, size1, start2, size2);
+    
+    if (size1 + size2 == 0)
+    {
+        return juce::Result::fail("MIDI output queue full");
+    }
+    
+    juce::MidiMessage message = juce::MidiMessage::createSysExMessage(data, dataSize);
+    
+    if (size1 > 0)
+    {
+        midiMessageQueue.set(start1, message);
+        midiFifo.finishedWrite(size1);
+    }
+    else if (size2 > 0)
+    {
+        midiMessageQueue.set(start2, message);
+        midiFifo.finishedWrite(size2);
+    }
+    
+    return juce::Result::ok();
+}
+
 void MidiManager::processAudioThread(juce::MidiBuffer& midiBuffer)
 {
     // This is called from processBlock() on the audio thread
@@ -202,10 +293,22 @@ bool MidiManager::isPortOpen() const noexcept
     return midiOutput != nullptr;
 }
 
+bool MidiManager::isInputPortOpen() const noexcept
+{
+    const juce::ScopedLock sl(deviceLock);
+    return midiInput != nullptr;
+}
+
 juce::String MidiManager::getCurrentPortName() const noexcept
 {
     const juce::ScopedLock sl(deviceLock);
     return currentPortName;
+}
+
+juce::String MidiManager::getCurrentInputPortName() const noexcept
+{
+    const juce::ScopedLock sl(deviceLock);
+    return currentInputPortName;
 }
 
 int MidiManager::getCurrentChannel() const noexcept
@@ -272,5 +375,42 @@ void MidiManager::closePort()
 {
     midiOutput.reset();
     currentPortName = juce::String();
+}
+
+juce::Result MidiManager::openInputPort(const juce::String& portName)
+{
+    if (portName.isEmpty())
+    {
+        closeInputPort();
+        return juce::Result::ok();
+    }
+    
+    auto availablePorts = juce::MidiInput::getDevices();
+    int portIndex = availablePorts.indexOf(portName);
+    
+    if (portIndex < 0)
+    {
+        return juce::Result::fail("MIDI input port not found: " + portName);
+    }
+    
+    midiInput = juce::MidiInput::openDevice(portIndex, inputCallback.get());
+    if (midiInput == nullptr)
+    {
+        return juce::Result::fail("Failed to open MIDI input port: " + portName);
+    }
+    
+    midiInput->start();
+    currentInputPortName = portName;
+    return juce::Result::ok();
+}
+
+void MidiManager::closeInputPort()
+{
+    if (midiInput != nullptr)
+    {
+        midiInput->stop();
+        midiInput.reset();
+    }
+    currentInputPortName = juce::String();
 }
 

@@ -22,7 +22,7 @@ public:
     void paint(juce::Graphics& g) override;
     void resized() override;
     
-    // ChangeListener (for PatchBank updates)
+    // ChangeListener (for PatchBank updates and MIDI Learn)
     void changeListenerCallback(juce::ChangeBroadcaster* source) override;
     
 private:
@@ -43,6 +43,7 @@ private:
     void onPatchRecall(int slotIndex);
     void onSearchTextChanged(const juce::String& query);
     void onFavoritesFilterChanged(bool favoritesOnly);
+    void updateLearningStates();
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(PatchListPanel)
 };

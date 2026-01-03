@@ -1,5 +1,6 @@
 #include "ToolbarPanel.h"
 #include "ValhallaLookAndFeel.h"
+#include "PatchOperationDialogs.h"
 
 ToolbarPanel::ToolbarPanel(PatchManager& pm)
     : patchManager(pm)
@@ -66,23 +67,19 @@ void ToolbarPanel::buttonClicked(juce::Button* button)
     }
     else if (button == &copyButton)
     {
-        // TODO: Show dialog to select source/dest slots
-        // For now, placeholder - would need UI for slot selection
-        if (onCopyPatch)
-        {
-            // Example: copy slot 0 to slot 1 (would be replaced with user selection)
-            // onCopyPatch(0, 1);
-        }
+        CopyPatchDialog dialog(128);
+        juce::DialogWindow::showDialog("Copy Patch", &dialog, getTopLevelComponent(),
+                                      juce::Colours::white, true);
+        
+        patchManager.copyPatch(dialog.getSourceSlot(), dialog.getDestSlot());
     }
     else if (button == &clearButton)
     {
-        // TODO: Show dialog to select range
-        // For now, placeholder
-        if (onClearRange)
-        {
-            // Example: clear slots 0-10 (would be replaced with user selection)
-            // onClearRange(0, 10);
-        }
+        PatchRangeDialog dialog(128);
+        juce::DialogWindow::showDialog("Clear Patch Range", &dialog, getTopLevelComponent(),
+                                      juce::Colours::white, true);
+        
+        patchManager.clearPatchRange(dialog.getStartSlot(), dialog.getEndSlot());
     }
 }
 

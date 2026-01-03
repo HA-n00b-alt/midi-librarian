@@ -19,8 +19,9 @@ PatchListPanel::PatchListPanel(PatchManager& pm)
     viewport.setViewedComponent(&listContainer, false);
     viewport.setScrollBarsShown(true, false, false, false);
     
-    // Listen for patch bank changes
+    // Listen for patch bank changes and MIDI learn changes
     patchManager.getPatchBank().addChangeListener(this);
+    patchManager.getMidiLearnManager().addChangeListener(this);
     
     rebuildList();
 }
@@ -28,6 +29,7 @@ PatchListPanel::PatchListPanel(PatchManager& pm)
 PatchListPanel::~PatchListPanel()
 {
     patchManager.getPatchBank().removeChangeListener(this);
+    patchManager.getMidiLearnManager().removeChangeListener(this);
 }
 
 void PatchListPanel::paint(juce::Graphics& g)
@@ -105,6 +107,11 @@ void PatchListPanel::changeListenerCallback(juce::ChangeBroadcaster* source)
             applyFilters(); // Re-apply filters in case favorites changed
         }
     }
+    else if (source == &patchManager.getMidiLearnManager())
+    {
+        // Update learning states
+        updateLearningStates();
+    }
 }
 
 void PatchListPanel::rebuildList()
@@ -135,9 +142,26 @@ void PatchListPanel::rebuildList()
             patchManager.setPatchFavorite(slot, favorite);
         };
         
+        item->onLearn = [this](int slot)
+        {
+            if (patchManager.getMidiLearnManager().isLearning() && 
+                patchManager.getMidiLearnManager().getLearningSlot() == slot)
+            {
+                // Stop learning if already learning this slot
+                patchManager.getMidiLearnManager().stopLearning();
+            }
+            else
+            {
+                patchManager.getMidiLearnManager().startLearning(slot);
+            }
+        };
+        
         patchItems.add(item);
         listContainer.addChildComponent(item); // Use addChildComponent so we can hide/show
     }
+    
+    // Update learning state
+    updateLearningStates();
     
     applyFilters();
     resized();
@@ -183,6 +207,18 @@ void PatchListPanel::onFavoritesFilterChanged(bool favoritesOnly)
 {
     showFavoritesOnly = favoritesOnly;
     applyFilters();
+}
+
+void PatchListPanel::updateLearningStates()
+{
+    int learningSlot = patchManager.getMidiLearnManager().getLearningSlot();
+    for (int i = 0; i < patchItems.size(); ++i)
+    {
+        if (patchItems[i] != nullptr)
+        {
+            patchItems[i]->setLearning(i == learningSlot);
+        }
+    }
 }
 
 void PatchListPanel::onPatchRename(int slotIndex, const juce::String& newName)

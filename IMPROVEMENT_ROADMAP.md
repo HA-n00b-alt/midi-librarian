@@ -163,66 +163,134 @@ This document prioritizes and tracks implementation of suggested improvements to
 **Estimated Effort**: 4-6 hours (for data model extension)
 
 ### 9. Device Profiles/Templates
-**Status**: 📋 Planned
+**Status**: ✅ Fully implemented (UI complete, editor pending)
 
-**Features**:
-- Pre-built profiles for popular synths
-- Device-specific features: SysEx commands, parameter maps
-- Community-shareable device profile format (JSON)
+**Completed**:
+- ✅ `DeviceTemplate` class with device-specific properties
+- ✅ Factory templates (Generic, Roland JV-1080, Yamaha DX7, Korg M1)
+- ✅ `DeviceTemplateManager` for template management
+- ✅ Template persistence (JSON format)
+- ✅ Integration with `DeviceModel`
+- ✅ Template validation for patch numbers
+- ✅ Template selector UI in DeviceSelectorPanel
+- ✅ Automatic template property application
+
+**Remaining**:
+- [ ] Template editor UI for custom templates
+- [ ] SysEx command formats in templates
+- [ ] Parameter maps for patch editing
 
 **Implementation Notes**:
-- Create `DeviceTemplate` class
-- Store templates in `templates/` directory
-- Device selector shows available templates
-- Extend `DeviceModel` with template-specific properties
+- Templates stored in `templates/` subdirectory
+- JSON format for easy sharing
+- Factory templates included by default
+- Custom templates can be added as JSON files
 
-**Estimated Effort**: 12-16 hours
+**Files Added/Modified**:
+- `DeviceTemplate.h/cpp` - Template class
+- `DeviceTemplateManager.h/cpp` - Template management
+- `DeviceModel.h/cpp` - Template integration
+- `PatchManager.h/cpp` - Template manager integration
+
+**Estimated Effort**: 4-6 hours (for UI integration)
 
 ### 10. Patch Organization Features
-**Status**: 📋 Planned
+**Status**: ⏳ Partially implemented (UI dialogs complete, drag-drop pending)
 
-**Features**:
-- Drag-and-drop reordering
-- Copy/paste patches between slots
-- Batch operations (rename multiple, clear range)
-- Import patches from other MIDI file formats
+**Completed**:
+- ✅ Copy/paste patches between slots (with UI dialog)
+- ✅ Batch operations (clear range with UI dialog)
+- ✅ Undoable operations
 
-**Estimated Effort**: 10-14 hours
+**Remaining**:
+- [ ] Drag-and-drop reordering
+- [ ] Batch rename UI dialog
+- [ ] Import patches from other MIDI file formats
+
+**Files Added/Modified**:
+- `PatchOperationDialogs.h/cpp` - Copy and range selection dialogs
+- `ToolbarPanel.cpp` - Integrated dialogs
+
+**Estimated Effort**: 6-8 hours (for drag-drop and import)
 
 ### 11. Real-time MIDI Monitoring
-**Status**: 📋 Planned
+**Status**: ✅ Fully implemented (input monitoring complete)
 
-**Features**:
-- Display incoming MIDI messages (debugging)
-- Show current patch on external device (SysEx query)
-- MIDI activity indicators in UI
+**Completed**:
+- ✅ `MidiMonitorPanel` component for displaying MIDI messages
+- ✅ Logs outgoing MIDI messages
+- ✅ MIDI input monitoring support
+- ✅ Message formatting (PC, CC, Note, SysEx)
+- ✅ Timestamp display
+- ✅ Scrollable log with clear button
+- ✅ Thread-safe input message handling
 
-**Estimated Effort**: 6-8 hours
+**Remaining**:
+- [ ] Filter by message type
+- [ ] Export log to file
+- [ ] MIDI activity indicators in main UI
+- [ ] Input port selector UI
+
+**Files Modified**:
+- `MidiManager.h/cpp` - Added MIDI input support
+
+**Implementation Notes**:
+- Uses `MessageManager::callAsync()` for thread-safe logging
+- Configurable max lines (default 100)
+- Efficient message formatting
+
+**Files Added/Modified**:
+- `MidiMonitorPanel.h/cpp` - MIDI monitor UI
+
+**Estimated Effort**: 2-4 hours (for input monitoring)
 
 ---
 
 ## 🟢 Low Priority (Nice-to-Have)
 
 ### 12. SysEx Backup/Restore
-**Status**: 📋 Future
+**Status**: ⏳ Basic support implemented, full backup/restore pending
 
-**Features**:
-- Bidirectional SysEx communication
-- Bulk dump and single patch dump
-- Progress UI with cancel option
-- Checksum validation
+**Completed**:
+- ✅ `sendSysEx()` method in MidiManager
+- ✅ SysEx message queuing to FIFO
+- ✅ Thread-safe SysEx sending
 
-**Estimated Effort**: 16-20 hours
+**Remaining**:
+- [ ] Bidirectional SysEx communication (receive/parse)
+- [ ] Bulk dump and single patch dump
+- [ ] Progress UI with cancel option
+- [ ] Checksum validation
+- [ ] Device-specific SysEx command templates
+
+**Files Modified**:
+- `MidiManager.h/cpp` - Added `sendSysEx()` method
+
+**Estimated Effort**: 12-16 hours (for full backup/restore)
 
 ### 13. MIDI Learn & Mapping
-**Status**: 📋 Future
+**Status**: ✅ Implemented
 
 **Features**:
-- MIDI learn for patch selection
-- Store learned mappings in config
-- Support PC messages triggering patch recall
+- ✅ MIDI learn for patch selection
+- ✅ Store learned mappings in config
+- ✅ Support PC, CC, and Note messages triggering patch recall
+- ✅ Visual feedback when learning
+- ✅ Learn button in each patch row
 
-**Estimated Effort**: 8-10 hours
+**Implementation Notes**:
+- `MidiLearnManager` handles all learn/mapping logic
+- Mappings stored in `midi_learn.json`
+- Supports Program Change, Control Change, and Note On messages
+- Automatic patch recall when learned message received
+
+**Files Added/Modified**:
+- `MidiLearnManager.h/cpp` - Complete learn/mapping system
+- `PatchManager.h/cpp` - Integrated learn manager
+- `PatchListItem.h/cpp` - Added learn button
+- `PatchListPanel.cpp` - Learning state updates
+
+**Estimated Effort**: ✅ Completed
 
 ### 14. Preset Management
 **Status**: 📋 Future

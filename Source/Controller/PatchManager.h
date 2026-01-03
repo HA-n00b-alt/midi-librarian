@@ -5,6 +5,8 @@
 #include "../Model/DeviceModel.h"
 #include "MidiManager.h"
 #include "PersistenceManager.h"
+#include "DeviceTemplateManager.h"
+#include "MidiLearnManager.h"
 #include "UndoableActions.h"
 
 /**
@@ -28,6 +30,8 @@ public:
     const DeviceModel& getDeviceModel() const noexcept { return deviceModel; }
     MidiManager& getMidiManager() noexcept { return midiManager; }
     PersistenceManager& getPersistenceManager() noexcept { return persistenceManager; }
+    DeviceTemplateManager& getTemplateManager() noexcept { return templateManager; }
+    MidiLearnManager& getMidiLearnManager() noexcept { return midiLearnManager; }
     juce::UndoManager& getUndoManager() noexcept { return undoManager; }
     
     // Patch operations (with undo support)
@@ -67,6 +71,8 @@ private:
     DeviceModel deviceModel;
     MidiManager midiManager;
     PersistenceManager persistenceManager;
+    DeviceTemplateManager templateManager;
+    MidiLearnManager midiLearnManager;
     juce::UndoManager undoManager;
     
     void syncMidiManagerWithDeviceModel();

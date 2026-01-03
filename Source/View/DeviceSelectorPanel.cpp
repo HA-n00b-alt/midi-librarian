@@ -39,6 +39,15 @@ DeviceSelectorPanel::DeviceSelectorPanel(PatchManager& pm)
     useMSBButton.addListener(this);
     addAndMakeVisible(useMSBButton);
     
+    // Template selection
+    templateLabel.setText("Device:", juce::dontSendNotification);
+    templateLabel.setJustificationType(juce::Justification::centredLeft);
+    addAndMakeVisible(templateLabel);
+    
+    templateComboBox.addListener(this);
+    updateTemplateComboBox();
+    addAndMakeVisible(templateComboBox);
+    
     // Listen for MIDI device changes
     patchManager.getMidiManager().addChangeListener(this);
     
@@ -104,6 +113,14 @@ void DeviceSelectorPanel::resized()
     bankRow.removeFromRight(spacing);
     
     bankComboBox.setBounds(bankRow.removeFromLeft(80));
+    
+    bounds.removeFromTop(spacing);
+    
+    // Template selection row
+    auto templateRow = bounds.removeFromTop(controlHeight);
+    templateLabel.setBounds(templateRow.removeFromLeft(labelWidth));
+    templateRow.removeFromLeft(spacing);
+    templateComboBox.setBounds(templateRow);
 }
 
 void DeviceSelectorPanel::comboBoxChanged(juce::ComboBox* comboBoxThatHasChanged)
@@ -129,6 +146,32 @@ void DeviceSelectorPanel::comboBoxChanged(juce::ComboBox* comboBoxThatHasChanged
         {
             bool useMSB = useMSBButton.getToggleState();
             patchManager.getMidiManager().sendBankSelect(selectedBank, useMSB);
+        }
+    }
+    else if (comboBoxThatHasChanged == &templateComboBox)
+    {
+        int selectedId = templateComboBox.getSelectedId();
+        if (selectedId > 0)
+        {
+            auto templates = patchManager.getTemplateManager().getAvailableTemplates();
+            if (selectedId <= templates.size())
+            {
+                const auto& template_ = templates[selectedId - 1];
+                patchManager.getDeviceModel().setDeviceID(template_.getDeviceID());
+                patchManager.getDeviceModel().setTemplate(template_);
+                
+                // Update channel to template default if not set
+                if (patchManager.getDeviceModel().getMidiChannelDisplay() == 1)
+                {
+                    patchManager.setMidiChannel(template_.getDefaultChannel());
+                }
+                
+                // Update bank select UI based on template
+                useMSBButton.setToggleState(template_.usesMSB(), juce::dontSendNotification);
+                useMSBButton.setEnabled(template_.usesBankSelect());
+                
+                patchManager.saveAll();
+            }
         }
     }
 }
@@ -194,6 +237,31 @@ void DeviceSelectorPanel::updateBankComboBox()
         bankComboBox.addItem("Bank " + juce::String(i), i + 1);
     }
     bankComboBox.setSelectedId(1, juce::dontSendNotification); // Default to bank 0
+}
+
+void DeviceSelectorPanel::updateTemplateComboBox()
+{
+    templateComboBox.clear();
+    auto templates = patchManager.getTemplateManager().getAvailableTemplates();
+    
+    for (int i = 0; i < templates.size(); ++i)
+    {
+        const auto& template_ = templates[i];
+        juce::String displayName = template_.getManufacturer() + " " + template_.getDeviceName();
+        templateComboBox.addItem(displayName, i + 1);
+        
+        // Select current template if it matches
+        if (template_.getDeviceID() == patchManager.getDeviceModel().getDeviceID())
+        {
+            templateComboBox.setSelectedId(i + 1, juce::dontSendNotification);
+        }
+    }
+    
+    // Default to first template if none selected
+    if (templateComboBox.getSelectedId() == 0 && templates.size() > 0)
+    {
+        templateComboBox.setSelectedId(1, juce::dontSendNotification);
+    }
 }
 
 void DeviceSelectorPanel::updateConnectionStatus()

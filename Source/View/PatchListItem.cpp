@@ -34,6 +34,11 @@ PatchListItem::PatchListItem(int slot, const juce::String& name)
     favoriteButton.addListener(this);
     addAndMakeVisible(favoriteButton);
     
+    // Learn button
+    learnButton.setButtonText("Learn");
+    learnButton.addListener(this);
+    addAndMakeVisible(learnButton);
+    
     // Make entire row clickable for editing
     nameLabel.addMouseListener(this, false);
 }
@@ -44,9 +49,21 @@ void PatchListItem::paint(juce::Graphics& g)
     
     // Background
     auto& lf = getLookAndFeel();
-    auto bgColour = isSelected
-        ? static_cast<ValhallaLookAndFeel&>(lf).getAccentColour().withAlpha(0.1f)
-        : static_cast<ValhallaLookAndFeel&>(lf).getBackgroundColour();
+    juce::Colour bgColour;
+    
+    if (isLearning)
+    {
+        // Highlight when learning
+        bgColour = static_cast<ValhallaLookAndFeel&>(lf).getAccentColour().withAlpha(0.2f);
+    }
+    else if (isSelected)
+    {
+        bgColour = static_cast<ValhallaLookAndFeel&>(lf).getAccentColour().withAlpha(0.1f);
+    }
+    else
+    {
+        bgColour = static_cast<ValhallaLookAndFeel&>(lf).getBackgroundColour();
+    }
     
     g.setColour(bgColour);
     g.fillRect(bounds);
@@ -62,12 +79,16 @@ void PatchListItem::resized()
     const int slotWidth = 60;
     const int buttonWidth = 80;
     const int favoriteButtonWidth = 32;
+    const int learnButtonWidth = 60;
     const int spacing = 8;
     
     slotLabel.setBounds(bounds.removeFromLeft(slotWidth));
     bounds.removeFromLeft(spacing);
     
     recallButton.setBounds(bounds.removeFromRight(buttonWidth));
+    bounds.removeFromRight(spacing);
+    
+    learnButton.setBounds(bounds.removeFromRight(learnButtonWidth));
     bounds.removeFromRight(spacing);
     
     favoriteButton.setBounds(bounds.removeFromRight(favoriteButtonWidth));
@@ -113,6 +134,10 @@ void PatchListItem::buttonClicked(juce::Button* button)
     {
         isFavoriteFlag = favoriteButton.getToggleState();
         onFavoriteChanged(slotIndex, isFavoriteFlag);
+    }
+    else if (button == &learnButton && onLearn)
+    {
+        onLearn(slotIndex);
     }
 }
 

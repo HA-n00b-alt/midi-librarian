@@ -5,8 +5,27 @@ PatchManager::PatchManager()
     // Load saved data on startup
     loadAll();
     
+    // Load device template if device ID is set
+    if (deviceModel.getDeviceID() != "generic")
+    {
+        auto template_ = templateManager.getTemplate(deviceModel.getDeviceID());
+        deviceModel.setTemplate(template_);
+    }
+    
     // Sync MIDI manager with device model
     syncMidiManagerWithDeviceModel();
+    
+    // Setup MIDI learn callback
+    midiLearnManager.onPatchRecall = [this](int slotIndex)
+    {
+        recallPatch(slotIndex);
+    };
+    
+    // Setup MIDI input callback to process learn messages
+    midiManager.onMidiInput = [this](const juce::MidiMessage& message)
+    {
+        midiLearnManager.processMidiMessage(message);
+    };
     
     // Listen to undo manager for change notifications
     undoManager.addChangeListener(this);
@@ -194,12 +213,30 @@ void PatchManager::saveAll()
 {
     persistenceManager.savePatchBank(patchBank);
     persistenceManager.saveDeviceConfig(deviceModel);
+    
+    // Save MIDI learn mappings
+    auto learnFile = persistenceManager.getDataDirectory().getChildFile("midi_learn.json");
+    auto learnVar = midiLearnManager.toVar();
+    juce::String jsonString = juce::JSON::toString(learnVar, true);
+    learnFile.replaceWithText(jsonString);
 }
 
 void PatchManager::loadAll()
 {
     persistenceManager.loadPatchBank(patchBank);
     persistenceManager.loadDeviceConfig(deviceModel);
+    
+    // Load MIDI learn mappings
+    auto learnFile = persistenceManager.getDataDirectory().getChildFile("midi_learn.json");
+    if (learnFile.existsAsFile())
+    {
+        juce::String jsonString = learnFile.loadFileAsString();
+        auto learnVar = juce::JSON::parse(jsonString);
+        if (!learnVar.isUndefined())
+        {
+            midiLearnManager.fromVar(learnVar);
+        }
+    }
 }
 
 void PatchManager::exportPatches(const juce::File& file)

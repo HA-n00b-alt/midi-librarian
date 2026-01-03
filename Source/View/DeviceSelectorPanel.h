@@ -46,9 +46,13 @@ private:
     juce::ComboBox bankComboBox;
     juce::ToggleButton useMSBButton;
     
+    juce::Label templateLabel;
+    juce::ComboBox templateComboBox;
+    
     void refreshPortList();
     void updateChannelComboBox();
     void updateBankComboBox();
+    void updateTemplateComboBox();
     void updateConnectionStatus();
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(DeviceSelectorPanel)

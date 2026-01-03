@@ -23,9 +23,6 @@ public:
     // ChangeListener (for undo manager changes)
     void changeListenerCallback(juce::ChangeBroadcaster* source) override;
     
-    // Callbacks for patch operations
-    std::function<void(int sourceSlot, int destSlot)> onCopyPatch;
-    std::function<void(int startSlot, int endSlot)> onClearRange;
     
 private:
     PatchManager& patchManager;

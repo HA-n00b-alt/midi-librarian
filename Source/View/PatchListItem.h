@@ -33,11 +33,13 @@ public:
     std::function<void(int slotIndex, const juce::String& newName)> onRename;
     std::function<void(int slotIndex)> onRecall;
     std::function<void(int slotIndex, bool favorite)> onFavoriteChanged;
+    std::function<void(int slotIndex)> onLearn;
     
     void setPatchName(const juce::String& name);
     void setSelected(bool selected);
     void setFavorite(bool favorite);
     bool isFavorite() const noexcept { return isFavoriteFlag; }
+    void setLearning(bool learning) noexcept { isLearning = learning; repaint(); }
     
     void mouseDown(const juce::MouseEvent& e) override;
     
@@ -47,12 +49,14 @@ private:
     bool isSelected = false;
     bool isEditing = false;
     bool isFavoriteFlag = false;
+    bool isLearning = false;
     
     juce::Label slotLabel;
     juce::Label nameLabel;
     juce::TextEditor nameEditor;
     juce::TextButton recallButton;
     juce::TextButton favoriteButton;
+    juce::TextButton learnButton;
     
     void startEditing();
     void stopEditing(bool commit);

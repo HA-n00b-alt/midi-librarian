@@ -23,21 +23,39 @@ public:
     
     // Device management (message thread only)
     juce::Result setOutputPort(const juce::String& portName);
+    juce::Result setInputPort(const juce::String& portName);
     void setMidiChannel(int channel); // 1-16
     juce::StringArray getAvailableOutputPorts() const;
+    juce::StringArray getAvailableInputPorts() const;
     
     // MIDI operations (thread-safe, queues to FIFO)
     juce::Result sendProgramChange(int programNumber); // 0-127
     juce::Result sendControlChange(int controller, int value);
     juce::Result sendBankSelect(int bankNumber, bool useMSB = true); // Bank 0-127, MSB (CC#0) or LSB (CC#32)
+    juce::Result sendSysEx(const juce::uint8* data, int dataSize); // Send SysEx message
     
     // Audio thread processing (called from processBlock)
     void processAudioThread(juce::MidiBuffer& midiBuffer);
     
+    // MIDI input callback
+    class MidiInputCallback : public juce::MidiInputCallback
+    {
+    public:
+        MidiInputCallback(MidiManager& manager) : midiManager(manager) {}
+        void handleIncomingMidiMessage(juce::MidiInput* source, const juce::MidiMessage& message) override;
+    private:
+        MidiManager& midiManager;
+    };
+    
     // State (thread-safe reads)
     bool isPortOpen() const noexcept;
+    bool isInputPortOpen() const noexcept;
     juce::String getCurrentPortName() const noexcept;
+    juce::String getCurrentInputPortName() const noexcept;
     int getCurrentChannel() const noexcept; // Returns 1-16
+    
+    // MIDI input monitoring
+    std::function<void(const juce::MidiMessage&)> onMidiInput;
     
     // JUCE ChangeListener (for MIDI device list changes)
     void changeListenerCallback(juce::ChangeBroadcaster* source) override;
@@ -56,8 +74,14 @@ private:
     // Device state (protected by critical section for port operations)
     juce::CriticalSection deviceLock;
     juce::String currentPortName;
+    juce::String currentInputPortName;
     int midiChannel = 0; // 0-15 (channel 1-16)
     std::unique_ptr<juce::MidiOutput> midiOutput;
+    std::unique_ptr<juce::MidiInput> midiInput;
+    std::unique_ptr<MidiInputCallback> inputCallback;
+    
+    juce::Result openInputPort(const juce::String& portName);
+    void closeInputPort();
     
     JUCE_DECLARE_NON_COPYABLE_WITH_LEAK_DETECTOR(MidiManager)
 };
