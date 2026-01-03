@@ -9,17 +9,13 @@ MidiManager::MidiManager()
     // Create input callback
     inputCallback = std::make_unique<MidiInputCallback>(*this);
     
-    // Listen for MIDI device changes
-    juce::MidiOutput::getDevices(); // Trigger device list refresh
-    juce::MidiOutput::addChangeListener(this);
-    juce::MidiInput::getDevices(); // Trigger input device list refresh
-    juce::MidiInput::addChangeListener(this);
+    // Note: MIDI device change listeners have been removed in newer JUCE versions
+    // Device hotplug detection will need to be handled via polling or other mechanisms
 }
 
 MidiManager::~MidiManager()
 {
-    juce::MidiOutput::removeChangeListener(this);
-    juce::MidiInput::removeChangeListener(this);
+    // Note: Change listeners removed - no cleanup needed
     closePort();
     closeInputPort();
 }
@@ -70,12 +66,24 @@ void MidiManager::setMidiChannel(int channel)
 
 juce::StringArray MidiManager::getAvailableOutputPorts() const
 {
-    return juce::MidiOutput::getDevices();
+    juce::StringArray portNames;
+    auto devices = juce::MidiOutput::getAvailableDevices();
+    for (const auto& device : devices)
+    {
+        portNames.add(device.name);
+    }
+    return portNames;
 }
 
 juce::StringArray MidiManager::getAvailableInputPorts() const
 {
-    return juce::MidiInput::getDevices();
+    juce::StringArray portNames;
+    auto devices = juce::MidiInput::getAvailableDevices();
+    for (const auto& device : devices)
+    {
+        portNames.add(device.name);
+    }
+    return portNames;
 }
 
 juce::Result MidiManager::setInputPort(const juce::String& portName)
@@ -317,18 +325,19 @@ int MidiManager::getCurrentChannel() const noexcept
     return midiChannel + 1; // Return 1-16 for display
 }
 
-void MidiManager::changeListenerCallback(juce::ChangeBroadcaster* source)
-{
-    // MIDI device list changed - handle hotplug
-    refreshPortList();
-    sendChangeMessage();
-}
+// Note: changeListenerCallback removed - MIDI device change listeners no longer available in JUCE
+// For device hotplug detection, consider polling getAvailableDevices() periodically
 
 void MidiManager::refreshPortList()
 {
     const juce::ScopedLock sl(deviceLock);
     
-    auto availablePorts = juce::MidiOutput::getDevices();
+    auto availableDevices = juce::MidiOutput::getAvailableDevices();
+    juce::StringArray availablePorts;
+    for (const auto& device : availableDevices)
+    {
+        availablePorts.add(device.name);
+    }
     
     // If current port is no longer available, close it
     if (!currentPortName.isEmpty() && !availablePorts.contains(currentPortName))
@@ -353,15 +362,26 @@ juce::Result MidiManager::openPort(const juce::String& portName)
         return juce::Result::ok();
     }
     
-    auto availablePorts = juce::MidiOutput::getDevices();
-    int portIndex = availablePorts.indexOf(portName);
+    auto availableDevices = juce::MidiOutput::getAvailableDevices();
+    juce::MidiDeviceInfo deviceToOpen;
+    bool found = false;
     
-    if (portIndex < 0)
+    for (const auto& device : availableDevices)
+    {
+        if (device.name == portName)
+        {
+            deviceToOpen = device;
+            found = true;
+            break;
+        }
+    }
+    
+    if (!found)
     {
         return juce::Result::fail("MIDI output port not found: " + portName);
     }
     
-    midiOutput = juce::MidiOutput::openDevice(portIndex);
+    midiOutput = juce::MidiOutput::openDevice(deviceToOpen.identifier);
     if (midiOutput == nullptr)
     {
         return juce::Result::fail("Failed to open MIDI output port: " + portName);
@@ -385,15 +405,26 @@ juce::Result MidiManager::openInputPort(const juce::String& portName)
         return juce::Result::ok();
     }
     
-    auto availablePorts = juce::MidiInput::getDevices();
-    int portIndex = availablePorts.indexOf(portName);
+    auto availableDevices = juce::MidiInput::getAvailableDevices();
+    juce::MidiDeviceInfo deviceToOpen;
+    bool found = false;
     
-    if (portIndex < 0)
+    for (const auto& device : availableDevices)
+    {
+        if (device.name == portName)
+        {
+            deviceToOpen = device;
+            found = true;
+            break;
+        }
+    }
+    
+    if (!found)
     {
         return juce::Result::fail("MIDI input port not found: " + portName);
     }
     
-    midiInput = juce::MidiInput::openDevice(portIndex, inputCallback.get());
+    midiInput = juce::MidiInput::openDevice(deviceToOpen.identifier, inputCallback.get());
     if (midiInput == nullptr)
     {
         return juce::Result::fail("Failed to open MIDI input port: " + portName);

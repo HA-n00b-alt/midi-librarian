@@ -20,8 +20,8 @@ void ValhallaLookAndFeel::setupColours()
 
 void ValhallaLookAndFeel::setupFonts()
 {
-    // Use system font for crisp rendering
-    defaultFont = juce::Font(juce::Font::getDefaultSansSerifFontName(), 14.0f, juce::Font::plain);
+    // Use system font for crisp rendering (using new FontOptions API)
+    defaultFont = juce::Font(juce::FontOptions().withHeight(14.0f));
 }
 
 juce::Colour ValhallaLookAndFeel::getBackgroundColour() const

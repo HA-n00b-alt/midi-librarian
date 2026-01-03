@@ -9,13 +9,13 @@ PatchBank::PatchBank()
 const PatchData& PatchBank::getPatch(int slotIndex) const
 {
     jassert(isValidSlot(slotIndex));
-    return patches[slotIndex];
+    return patches.getReference(slotIndex);
 }
 
 PatchData& PatchBank::getPatch(int slotIndex)
 {
     jassert(isValidSlot(slotIndex));
-    return patches[slotIndex];
+    return patches.getReference(slotIndex);
 }
 
 void PatchBank::setPatch(int slotIndex, const PatchData& patch)

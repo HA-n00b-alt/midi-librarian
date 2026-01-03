@@ -123,11 +123,15 @@ void MidiLibrarianAudioProcessor::getStateInformation(juce::MemoryBlock& destDat
     // This is for DAW project save/load
     juce::MemoryOutputStream mos(destData, true);
     
-    auto var = juce::DynamicObject::Ptr(new juce::DynamicObject());
-    var->setProperty("patchBank", patchManager.getPatchBank().toVar());
-    var->setProperty("deviceConfig", patchManager.getDeviceModel().toVar());
+    // Create state object (same pattern as DeviceModel::toVar and PatchData::toVar)
+    juce::DynamicObject::Ptr stateObj = new juce::DynamicObject();
+    stateObj->setProperty("patchBank", patchManager.getPatchBank().toVar());
+    stateObj->setProperty("deviceConfig", patchManager.getDeviceModel().toVar());
     
-    juce::JSON::writeToStream(mos, juce::var(var));
+    // Convert to var - var constructor accepts ReferenceCountedObject* (raw pointer)
+    // Use .get() to get the raw pointer from the Ptr
+    juce::var stateVar(stateObj.get());
+    juce::JSON::writeToStream(mos, stateVar);
 }
 
 void MidiLibrarianAudioProcessor::setStateInformation(const void* data, int sizeInBytes)
@@ -163,5 +167,11 @@ juce::AudioProcessorEditor* MidiLibrarianAudioProcessor::createEditor()
 bool MidiLibrarianAudioProcessor::hasEditor() const
 {
     return true;
+}
+
+// This creates new instances of the plugin
+juce::AudioProcessor* JUCE_CALLTYPE createPluginFilter()
+{
+    return new MidiLibrarianAudioProcessor();
 }
 

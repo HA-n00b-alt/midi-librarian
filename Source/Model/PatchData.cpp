@@ -41,7 +41,7 @@ juce::var PatchData::toVar() const
         tagArray.add(juce::var(tag));
     obj->setProperty("tags", juce::var(tagArray));
     
-    return juce::var(obj);
+    return juce::var(obj.get());
 }
 
 PatchData PatchData::fromVar(const juce::var& v)
@@ -52,7 +52,7 @@ PatchData PatchData::fromVar(const juce::var& v)
         patch.slotIndex = obj->getProperty("slotIndex");
         patch.patchName = obj->getProperty("patchName").toString();
         patch.deviceID = juce::Identifier(obj->getProperty("deviceID").toString());
-        patch.isFavoriteFlag = obj->getProperty("isFavorite", false);
+        patch.isFavoriteFlag = obj->hasProperty("isFavorite") ? (bool)obj->getProperty("isFavorite") : false;
         
         // Deserialize tags array
         if (auto* tagArray = obj->getProperty("tags").getArray())

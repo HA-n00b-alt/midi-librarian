@@ -7,7 +7,7 @@ juce::var DeviceModel::toVar() const
     obj->setProperty("midiChannel", midiChannel + 1); // Store as 1-16
     obj->setProperty("deviceID", deviceID.toString());
     obj->setProperty("deviceTemplate", deviceTemplate.toVar());
-    return juce::var(obj);
+    return juce::var(obj.get());
 }
 
 void DeviceModel::fromVar(const juce::var& v)

@@ -14,8 +14,7 @@
  * 
  * This ensures proper DAW integration and sample-accurate MIDI timing.
  */
-class MidiManager : public juce::ChangeListener,
-                     public juce::ChangeBroadcaster
+class MidiManager : public juce::ChangeBroadcaster
 {
 public:
     MidiManager();
@@ -57,8 +56,8 @@ public:
     // MIDI input monitoring
     std::function<void(const juce::MidiMessage&)> onMidiInput;
     
-    // JUCE ChangeListener (for MIDI device list changes)
-    void changeListenerCallback(juce::ChangeBroadcaster* source) override;
+    // Note: MIDI device change listeners removed in newer JUCE
+    // Device hotplug can be detected by polling getAvailableDevices() periodically
     
 private:
     void refreshPortList();

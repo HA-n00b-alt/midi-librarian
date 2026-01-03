@@ -12,7 +12,7 @@ juce::var DeviceTemplate::toVar() const
     obj->setProperty("useMSB", useMSB);
     obj->setProperty("useLSB", useLSB);
     obj->setProperty("defaultChannel", defaultChannel);
-    return juce::var(obj);
+    return juce::var(obj.get());
 }
 
 DeviceTemplate DeviceTemplate::fromVar(const juce::var& v)
@@ -26,10 +26,10 @@ DeviceTemplate DeviceTemplate::fromVar(const juce::var& v)
         template_.deviceID = juce::Identifier(obj->getProperty("deviceID").toString());
         template_.minPatchNumber = obj->getProperty("minPatchNumber");
         template_.maxPatchNumber = obj->getProperty("maxPatchNumber");
-        template_.useBankSelect = obj->getProperty("useBankSelect", false);
-        template_.useMSB = obj->getProperty("useMSB", true);
-        template_.useLSB = obj->getProperty("useLSB", false);
-        template_.defaultChannel = obj->getProperty("defaultChannel", 1);
+        template_.useBankSelect = obj->hasProperty("useBankSelect") ? (bool)obj->getProperty("useBankSelect") : false;
+        template_.useMSB = obj->hasProperty("useMSB") ? (bool)obj->getProperty("useMSB") : true;
+        template_.useLSB = obj->hasProperty("useLSB") ? (bool)obj->getProperty("useLSB") : false;
+        template_.defaultChannel = obj->hasProperty("defaultChannel") ? (int)obj->getProperty("defaultChannel") : 1;
     }
     
     return template_;

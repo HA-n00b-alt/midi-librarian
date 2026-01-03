@@ -11,10 +11,17 @@
 class MidiLearnManager : public juce::ChangeBroadcaster
 {
 public:
+    enum MessageType
+    {
+        ProgramChange = 0,
+        ControlChange = 1,
+        NoteOn = 2
+    };
+    
     struct MidiMapping
     {
         int patchSlot = 0;
-        juce::MidiMessage::MidiMetaType messageType = juce::MidiMessage::programChange;
+        MessageType messageType = ProgramChange;
         int channel = 1; // 1-16
         int data1 = 0;   // Program number, CC number, or Note number
         int data2 = 0;   // CC value or Note velocity (0 for PC)

@@ -6,7 +6,7 @@ PatchManager::PatchManager()
     loadAll();
     
     // Load device template if device ID is set
-    if (deviceModel.getDeviceID() != "generic")
+    if (deviceModel.getDeviceID() != juce::Identifier("generic"))
     {
         auto template_ = templateManager.getTemplate(deviceModel.getDeviceID());
         deviceModel.setTemplate(template_);

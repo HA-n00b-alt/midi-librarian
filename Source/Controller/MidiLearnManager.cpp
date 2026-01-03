@@ -5,15 +5,15 @@ bool MidiLearnManager::MidiMapping::matches(const juce::MidiMessage& message) co
     if (message.getChannel() != channel)
         return false;
     
-    if (messageType == juce::MidiMessage::programChange && message.isProgramChange())
+    if (messageType == ProgramChange && message.isProgramChange())
     {
         return message.getProgramChangeNumber() == data1;
     }
-    else if (messageType == juce::MidiMessage::controller && message.isController())
+    else if (messageType == ControlChange && message.isController())
     {
         return message.getControllerNumber() == data1 && message.getControllerValue() == data2;
     }
-    else if (messageType == juce::MidiMessage::noteOn && message.isNoteOn())
+    else if (messageType == NoteOn && message.isNoteOn())
     {
         return message.getNoteNumber() == data1;
     }
@@ -29,7 +29,7 @@ juce::var MidiLearnManager::MidiMapping::toVar() const
     obj->setProperty("channel", channel);
     obj->setProperty("data1", data1);
     obj->setProperty("data2", data2);
-    return juce::var(obj);
+    return juce::var(obj.get());
 }
 
 MidiLearnManager::MidiMapping MidiLearnManager::MidiMapping::fromVar(const juce::var& v)
@@ -39,7 +39,7 @@ MidiLearnManager::MidiMapping MidiLearnManager::MidiMapping::fromVar(const juce:
     if (auto* obj = v.getDynamicObject())
     {
         mapping.patchSlot = obj->getProperty("patchSlot");
-        mapping.messageType = (juce::MidiMessage::MidiMetaType)(int)obj->getProperty("messageType");
+        mapping.messageType = (MessageType)(int)obj->getProperty("messageType");
         mapping.channel = obj->getProperty("channel");
         mapping.data1 = obj->getProperty("data1");
         mapping.data2 = obj->getProperty("data2");
@@ -111,19 +111,19 @@ void MidiLearnManager::processMidiMessage(const juce::MidiMessage& message)
         
         if (message.isProgramChange())
         {
-            mapping.messageType = juce::MidiMessage::programChange;
+            mapping.messageType = ProgramChange;
             mapping.data1 = message.getProgramChangeNumber();
             mapping.data2 = 0;
         }
         else if (message.isController())
         {
-            mapping.messageType = juce::MidiMessage::controller;
+            mapping.messageType = ControlChange;
             mapping.data1 = message.getControllerNumber();
             mapping.data2 = message.getControllerValue();
         }
         else if (message.isNoteOn())
         {
-            mapping.messageType = juce::MidiMessage::noteOn;
+            mapping.messageType = NoteOn;
             mapping.data1 = message.getNoteNumber();
             mapping.data2 = message.getVelocity();
         }

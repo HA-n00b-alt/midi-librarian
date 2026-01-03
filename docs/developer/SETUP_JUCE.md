@@ -69,7 +69,9 @@ xcodebuild -project Projucer.xcodeproj -scheme Projucer -configuration Release
 
 ## Step 3: Create JUCE Project File
 
-> **⚠️ Important**: See [PROJUCER_CONFIGURATION.md](PROJUCER_CONFIGURATION.md) for complete configuration guide with all settings explained.
+> **⚠️ Important**: 
+> - See [PROJUCER_CONFIGURATION.md](PROJUCER_CONFIGURATION.md) for complete configuration guide with all settings explained.
+> - See [ADDING_SOURCE_FILES.md](ADDING_SOURCE_FILES.md) for detailed guide on adding source files while maintaining folder structure.
 
 Since we don't have a `.jucer` file yet, we need to create one:
 
@@ -191,16 +193,64 @@ Since we don't have a `.jucer` file yet, we need to create one:
     - In Build Settings or Project Settings
     - **macOS Deployment Target**: 10.13 (for AUv3 support)
 
-4. **Add Source Files**
+4. **Add Source Files** ⚠️ **IMPORTANT: Keep Folder Structure!**
+
+   **Maintain your existing folder structure** - Projucer will preserve it:
+   
+   **Option A: Add Entire Source Directory** (Recommended)
+   - In Projucer, go to "Files" tab
    - Click "Add Files" or drag and drop
-   - Add all files from `Source/` directory:
+   - Select the entire `Source/` directory
+   - Projucer will add all files **maintaining the folder structure**:
      - `Source/Model/` (all .h and .cpp files)
      - `Source/View/` (all .h and .cpp files)
      - `Source/Controller/` (all .h and .cpp files)
      - `Source/PluginProcessor.h/cpp`
      - `Source/PluginEditor.h/cpp`
+   
+   **Option B: Add Folders Individually**
+   - Add `Source/Model/` folder (all files inside)
+   - Add `Source/View/` folder (all files inside)
+   - Add `Source/Controller/` folder (all files inside)
+   - Add `Source/PluginProcessor.h/cpp` files
+   - Add `Source/PluginEditor.h/cpp` files
+   
+   **Why Keep Structure?**
+   - Maintains MVC organization (Model/View/Controller)
+   - Easier to navigate in Xcode
+   - Matches your Git repository structure
+   - Better code organization
+   
+   **What NOT to Do**:
+   - ❌ Don't flatten everything into one directory
+   - ❌ Don't create new folder structure in Projucer
+   - ✅ Keep the existing `Source/Model/`, `Source/View/`, `Source/Controller/` structure
 
-5. **Configure Modules**
+5. **Verify File Structure in Projucer**
+   - After adding files, check the "Files" tab
+   - You should see the folder structure preserved:
+     ```
+     Source/
+     ├── Model/
+     │   ├── PatchData.h/cpp
+     │   ├── PatchBank.h/cpp
+     │   ├── DeviceModel.h/cpp
+     │   └── DeviceTemplate.h/cpp
+     ├── View/
+     │   ├── ValhallaLookAndFeel.h/cpp
+     │   ├── DeviceSelectorPanel.h/cpp
+     │   ├── PatchListPanel.h/cpp
+     │   └── ... (all view files)
+     ├── Controller/
+     │   ├── PatchManager.h/cpp
+     │   ├── MidiManager.h/cpp
+     │   └── ... (all controller files)
+     ├── PluginProcessor.h/cpp
+     └── PluginEditor.h/cpp
+     ```
+   - If files are flattened, remove them and re-add using folder structure
+
+6. **Configure Modules**
    - In "Modules" section, ensure these are included:
      - juce_audio_basics
      - juce_audio_devices
@@ -212,13 +262,15 @@ Since we don't have a `.jucer` file yet, we need to create one:
      - juce_gui_basics
      - juce_gui_extra
 
-6. **Set JUCE Path**
+7. **Set JUCE Path**
    - In Projucer settings, set JUCE path to your JUCE installation
    - Projucer → Global Paths → JUCE Path
+   - Or: Projucer → Preferences → Global Paths → JUCE Path
 
-7. **Save Project**
+8. **Save Project**
    - File → Save Project
-   - Save as `MIDI Librarian.jucer` in project root
+   - Save as `MIDI Librarian.jucer` in project root (same level as `Source/` directory)
+   - This keeps the project file with your source code
 
 ### Using Command Line (Alternative)
 
@@ -235,7 +287,16 @@ You can also create a basic `.jucer` file manually, but GUI is easier.
 
 3. **Xcode Project Location**
    - Project will be generated in `Builds/MacOSX/`
-   - File: `MIDI Librarian.xcodeproj`
+   - File: `MIDI Librarian.xcodeproj` (this is a **bundle/folder**, not a single file)
+   - Inside: `project.pbxproj` (the actual project file)
+   
+   **⚠️ Note**: `.xcodeproj` is a bundle (special folder) - this is normal! Just double-click it to open in Xcode.
+
+4. **Open in Xcode**
+   - Double-click `MIDI Librarian.xcodeproj` in Finder
+   - Or: Xcode opens automatically if you clicked "Save and Open in IDE"
+   
+   > **📖 Next Steps**: See [BUILDING_IN_XCODE.md](BUILDING_IN_XCODE.md) for detailed build and testing instructions.
 
 ## Step 5: Configure Build Settings
 
@@ -303,19 +364,36 @@ After creating the project, verify these critical settings:
 
 ## Step 6: Build and Install
 
-1. **Build in Xcode**
+> **📖 Detailed Guide**: See [BUILDING_IN_XCODE.md](BUILDING_IN_XCODE.md) for complete step-by-step instructions.
+
+### Quick Steps:
+
+1. **Open Xcode Project**
+   - Navigate to `Builds/MacOSX/`
+   - Double-click `MIDI Librarian.xcodeproj` (it's a folder/bundle - this is normal!)
+   - Xcode opens
+
+2. **Select Scheme**
+   - Top toolbar: Select `MIDI Librarian - AU` scheme
+   - Platform: `My Mac`
+
+3. **Build**
    - Product → Build (Cmd+B)
-   - Or click Build button
+   - Or click Build button (hammer icon)
 
-2. **Install Plugin**
-   - Product → Archive (for distribution)
-   - Or build will auto-install to:
-     - `~/Library/Audio/Plug-Ins/Components/MIDI Librarian.component`
+4. **Verify Build**
+   - Green checkmark = Success
+   - Red X = Check error messages
 
-3. **Verify Installation**
-   ```bash
-   ls -la ~/Library/Audio/Plug-Ins/Components/ | grep -i midi
-   ```
+5. **Plugin Auto-Installs**
+   - After successful build, plugin installs to:
+   - `~/Library/Audio/Plug-Ins/Components/MIDI Librarian.component`
+
+6. **Test in Logic Pro**
+   - Launch Logic Pro
+   - Create MIDI track
+   - Insert plugin: MIDI Effects → MIDI Librarian
+   - Test functionality
 
 ## Step 7: Test in Logic Pro
 

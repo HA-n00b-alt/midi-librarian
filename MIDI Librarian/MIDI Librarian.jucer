@@ -1,17 +1,96 @@
 <?xml version="1.0" encoding="UTF-8"?>
 
-<JUCERPROJECT id="XYkt1B" name="MIDI Librarian" projectType="guiapp" useAppConfig="0"
-              addUsingNamespaceToJuceHeader="0" jucerFormatVersion="1">
+<JUCERPROJECT id="XYkt1B" name="MIDI Librarian" projectType="audioplug" useAppConfig="0"
+              addUsingNamespaceToJuceHeader="0" jucerFormatVersion="1" companyWebsite="www.delman.it"
+              companyEmail="delman@delman.it" pluginCharacteristicsValue="pluginProducesMidiOut,pluginWantsMidiIn"
+              pluginFormats="buildAUv3,buildVST3" pluginManufacturerCode="DELM"
+              pluginCode="MLBR" pluginManufacturer="Delman" companyName="delman"
+              pluginDesc="Generic MIDI librarian" pluginAUMainType="'aumi'">
   <MAINGROUP id="aYKyAm" name="MIDI Librarian">
-    <GROUP id="{34B565FC-8C27-87BC-F9CA-716FFC92E21C}" name="Source"/>
+    <GROUP id="{34B565FC-8C27-87BC-F9CA-716FFC92E21C}" name="Source">
+      <GROUP id="{C84BC541-7C85-5632-41DB-C6DDDF7493C0}" name="Controller">
+        <FILE id="sl6GPS" name="DeviceTemplateManager.cpp" compile="1" resource="0"
+              file="../Source/Controller/DeviceTemplateManager.cpp"/>
+        <FILE id="zbQhcM" name="DeviceTemplateManager.h" compile="0" resource="0"
+              file="../Source/Controller/DeviceTemplateManager.h"/>
+        <FILE id="o7m9xe" name="MidiLearnManager.cpp" compile="1" resource="0"
+              file="../Source/Controller/MidiLearnManager.cpp"/>
+        <FILE id="jxWvLy" name="MidiLearnManager.h" compile="0" resource="0"
+              file="../Source/Controller/MidiLearnManager.h"/>
+        <FILE id="V7O3vG" name="MidiManager.cpp" compile="1" resource="0" file="../Source/Controller/MidiManager.cpp"/>
+        <FILE id="N7EUkE" name="MidiManager.h" compile="0" resource="0" file="../Source/Controller/MidiManager.h"/>
+        <FILE id="J41Shi" name="PatchManager.cpp" compile="1" resource="0"
+              file="../Source/Controller/PatchManager.cpp"/>
+        <FILE id="k0sxfx" name="PatchManager.h" compile="0" resource="0" file="../Source/Controller/PatchManager.h"/>
+        <FILE id="I4hReF" name="PersistenceManager.cpp" compile="1" resource="0"
+              file="../Source/Controller/PersistenceManager.cpp"/>
+        <FILE id="nzycCD" name="PersistenceManager.h" compile="0" resource="0"
+              file="../Source/Controller/PersistenceManager.h"/>
+        <FILE id="hJmk55" name="UndoableActions.h" compile="0" resource="0"
+              file="../Source/Controller/UndoableActions.h"/>
+      </GROUP>
+      <GROUP id="{62024CAF-B7FB-C63C-7C33-34206155BCA5}" name="Model">
+        <FILE id="iL14rj" name="DeviceModel.cpp" compile="1" resource="0" file="../Source/Model/DeviceModel.cpp"/>
+        <FILE id="shexCr" name="DeviceModel.h" compile="0" resource="0" file="../Source/Model/DeviceModel.h"/>
+        <FILE id="YCIydx" name="DeviceTemplate.cpp" compile="1" resource="0"
+              file="../Source/Model/DeviceTemplate.cpp"/>
+        <FILE id="C0Se9z" name="DeviceTemplate.h" compile="0" resource="0"
+              file="../Source/Model/DeviceTemplate.h"/>
+        <FILE id="lqsqZd" name="PatchBank.cpp" compile="1" resource="0" file="../Source/Model/PatchBank.cpp"/>
+        <FILE id="C5VfDy" name="PatchBank.h" compile="0" resource="0" file="../Source/Model/PatchBank.h"/>
+        <FILE id="Jq4gO9" name="PatchData.cpp" compile="1" resource="0" file="../Source/Model/PatchData.cpp"/>
+        <FILE id="dgoTiP" name="PatchData.h" compile="0" resource="0" file="../Source/Model/PatchData.h"/>
+      </GROUP>
+      <GROUP id="{5FA62702-422F-0F4F-7DE1-0E0BE7689515}" name="View">
+        <FILE id="GWacKJ" name="DeviceSelectorPanel.cpp" compile="1" resource="0"
+              file="../Source/View/DeviceSelectorPanel.cpp"/>
+        <FILE id="z6wRlS" name="DeviceSelectorPanel.h" compile="0" resource="0"
+              file="../Source/View/DeviceSelectorPanel.h"/>
+        <FILE id="pELNhl" name="DeviceStatusIndicator.cpp" compile="1" resource="0"
+              file="../Source/View/DeviceStatusIndicator.cpp"/>
+        <FILE id="VS8bwf" name="DeviceStatusIndicator.h" compile="0" resource="0"
+              file="../Source/View/DeviceStatusIndicator.h"/>
+        <FILE id="UPa8k4" name="MidiMonitorPanel.cpp" compile="1" resource="0"
+              file="../Source/View/MidiMonitorPanel.cpp"/>
+        <FILE id="piFwTS" name="MidiMonitorPanel.h" compile="0" resource="0"
+              file="../Source/View/MidiMonitorPanel.h"/>
+        <FILE id="UtLvrB" name="PatchListItem.cpp" compile="1" resource="0"
+              file="../Source/View/PatchListItem.cpp"/>
+        <FILE id="jAdFZg" name="PatchListItem.h" compile="0" resource="0" file="../Source/View/PatchListItem.h"/>
+        <FILE id="W2jA2e" name="PatchListPanel.cpp" compile="1" resource="0"
+              file="../Source/View/PatchListPanel.cpp"/>
+        <FILE id="fHFcbN" name="PatchListPanel.h" compile="0" resource="0"
+              file="../Source/View/PatchListPanel.h"/>
+        <FILE id="UfrAjH" name="PatchOperationDialogs.cpp" compile="1" resource="0"
+              file="../Source/View/PatchOperationDialogs.cpp"/>
+        <FILE id="LN6XQj" name="PatchOperationDialogs.h" compile="0" resource="0"
+              file="../Source/View/PatchOperationDialogs.h"/>
+        <FILE id="LHebqf" name="SearchBar.cpp" compile="1" resource="0" file="../Source/View/SearchBar.cpp"/>
+        <FILE id="k1MEEr" name="SearchBar.h" compile="0" resource="0" file="../Source/View/SearchBar.h"/>
+        <FILE id="CI78Nd" name="ToolbarPanel.cpp" compile="1" resource="0"
+              file="../Source/View/ToolbarPanel.cpp"/>
+        <FILE id="iU5aUj" name="ToolbarPanel.h" compile="0" resource="0" file="../Source/View/ToolbarPanel.h"/>
+        <FILE id="S1G7kc" name="ValhallaLookAndFeel.cpp" compile="1" resource="0"
+              file="../Source/View/ValhallaLookAndFeel.cpp"/>
+        <FILE id="FY9bHI" name="ValhallaLookAndFeel.h" compile="0" resource="0"
+              file="../Source/View/ValhallaLookAndFeel.h"/>
+      </GROUP>
+      <FILE id="XBKu5P" name="PluginEditor.cpp" compile="1" resource="0"
+            file="../Source/PluginEditor.cpp"/>
+      <FILE id="yp2GjO" name="PluginEditor.h" compile="0" resource="0" file="../Source/PluginEditor.h"/>
+      <FILE id="BotpeG" name="PluginProcessor.cpp" compile="1" resource="0"
+            file="../Source/PluginProcessor.cpp"/>
+      <FILE id="vgDARp" name="PluginProcessor.h" compile="0" resource="0"
+            file="../Source/PluginProcessor.h"/>
+    </GROUP>
   </MAINGROUP>
   <MODULES>
     <MODULE id="juce_audio_basics" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
     <MODULE id="juce_audio_devices" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
     <MODULE id="juce_audio_plugin_client" showAllCode="1" useLocalCopy="0"
             useGlobalPath="0"/>
-    <MODULE id="juce_audio_processors" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
-    <MODULE id="juce_audio_processors_headless" showAllCode="1" useLocalCopy="0"
+    <MODULE id="juce_audio_processors" showAllCode="0" useLocalCopy="0" useGlobalPath="0"/>
+    <MODULE id="juce_audio_processors_headless" showAllCode="0" useLocalCopy="0"
             useGlobalPath="0"/>
     <MODULE id="juce_core" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>
     <MODULE id="juce_data_structures" showAllCode="1" useLocalCopy="0" useGlobalPath="0"/>

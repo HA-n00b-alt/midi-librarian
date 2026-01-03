@@ -70,7 +70,9 @@ void PatchListItem::paint(juce::Graphics& g)
     
     // Subtle border
     g.setColour(static_cast<ValhallaLookAndFeel&>(lf).getBorderColour());
-    g.drawLine(bounds.getBottomLeft(), bounds.getBottomRight(), 0.5f);
+    auto bottomLeft = bounds.getBottomLeft().toFloat();
+    auto bottomRight = bounds.getBottomRight().toFloat();
+    g.drawLine(bottomLeft.x, bottomLeft.y, bottomRight.x, bottomRight.y, 0.5f);
 }
 
 void PatchListItem::resized()

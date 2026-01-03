@@ -5,7 +5,9 @@ MidiMonitorPanel::MidiMonitorPanel()
 {
     logEditor.setMultiLine(true);
     logEditor.setReadOnly(true);
-    logEditor.setFont(juce::Font(juce::Font::getDefaultMonospacedFontName(), 11.0f, juce::Font::plain));
+    // Create monospaced font - FontOptions doesn't have withFamily, so use Font constructor directly
+    juce::Font monospacedFont(juce::Font::getDefaultMonospacedFontName(), 11.0f, juce::Font::plain);
+    logEditor.setFont(monospacedFont);
     logEditor.setScrollbarsShown(true);
     addAndMakeVisible(logEditor);
     
@@ -17,14 +19,15 @@ MidiMonitorPanel::MidiMonitorPanel()
     exportButton.onClick = [this]()
     {
         juce::FileChooser chooser("Export MIDI Log", juce::File(), "*.txt");
-        if (chooser.browseForFileToSave(true))
+        auto chooserFlags = juce::FileBrowserComponent::saveMode | juce::FileBrowserComponent::canSelectFiles;
+        chooser.launchAsync(chooserFlags, [this](const juce::FileChooser& fc)
         {
-            auto file = chooser.getResult();
+            auto file = fc.getResult();
             if (file != juce::File())
             {
                 file.replaceWithText(logEditor.getText());
             }
-        }
+        });
     };
     addAndMakeVisible(exportButton);
 }
@@ -120,6 +123,8 @@ juce::String MidiMonitorPanel::formatMidiMessage(const juce::MidiMessage& messag
         description = "Other (0x" + juce::String::toHexString(message.getRawData(), message.getRawDataSize()) + ")";
     }
     
-    return juce::String::formatted("[%s] %s %s", timestamp.substring(11, 19), direction, description);
+    // Convert String objects to C strings for formatted (variadic functions can't handle String objects)
+    auto timeStr = timestamp.substring(11, 19);
+    return juce::String::formatted("[%s] %s %s", timeStr.toRawUTF8(), direction.toRawUTF8(), description.toRawUTF8());
 }
 
