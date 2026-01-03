@@ -110,19 +110,22 @@ Examples:
 
 ## Current Status
 
-- **MVP1**: In `development` branch
-- **MVP2**: Not yet started (will branch from `main` after MVP1)
+- **`main`**: ✅ Clean, single commit (MVP1 Release v1.0.0)
+- **`development`**: ✅ Active MVP1 development (full history)
+- **`mvp2`**: ❌ Not created yet (will branch from `main` when ready)
+
+## Branch Purpose
+
+See [BRANCH_PURPOSE.md](BRANCH_PURPOSE.md) for detailed explanation of what goes in each branch.
+
+**Quick Summary**:
+- **`main`**: Production releases only (clean, stable)
+- **`development`**: Active MVP1 work (bug fixes, improvements)
+- **`mvp2`**: Future features (create from `main` when ready)
 
 ## Cleaning Main Branch for First Release
 
-Before the first MVP1 release, it's common practice to clean the main branch. See [CLEAN_MAIN_BRANCH.md](CLEAN_MAIN_BRANCH.md) for detailed instructions.
-
-**Quick Summary**:
-1. Complete all development in `development` branch
-2. When ready, create clean main with single "MVP1 Release" commit
-3. Tag the release (v1.0.0)
-4. Protect main branch (no direct pushes)
-5. Continue development in `development`, merge stable releases to `main`
+✅ **Completed**: Main branch has been cleaned. See [CLEAN_MAIN_BRANCH.md](CLEAN_MAIN_BRANCH.md) for details.
 
 ## Migration Plan
 
